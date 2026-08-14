@@ -82,7 +82,7 @@ Two restrictions worth memorising:
   is `real_geq e v`.
 
 Observing an equality between continuous quantities conditions on an event of probability
-zero. Pluck handles this correctly by disintegration, but the semantics have consequences
+zero. Hybrid Pluck handles this correctly by disintegration, but the semantics have consequences
 that are easy to get wrong; see
 [Sharp Edges](sharp_edges.md#measure-zero-observations) for a worked example where the
 answer is *not* what naive density-cancelling reasoning predicts.
