@@ -1,0 +1,97 @@
+;; Dawid & Skene (1979) crowd-annotation model with Beta priors on each
+;; annotator's confusion rates. J annotators each label some items; we never see
+;; the ground-truth label of an item, only the (noisy, disagreeing) annotations.
+;; The task is to jointly recover (a) each item's latent true label and (b) how
+;; reliable each annotator is, from the annotations alone.
+;;
+;; Binary 2x2 confusion parameterisation -- each annotator j has two rates:
+;;   tp_j = P(annotator j says 1 | true label = 1)   "sensitivity"
+;;   fp_j = P(annotator j says 1 | true label = 0)   "false-positive rate"
+;; (specificity = 1 - fp_j). These are the CONFUSION RATES carrying the Beta
+;; priors below. The generative story:
+;;   prevalence ~ Beta(1,1)                 P(true label = 1), shared
+;;   tp_j ~ Beta(2,1), fp_j ~ Beta(1,2)     per-annotator, shared across items
+;;   z_i  ~ Bernoulli(prevalence)           item i's TRUE label   (DISCRETE latent)
+;;   r_ij ~ Bernoulli(z_i ? tp_j : fp_j)    annotation, OBSERVED when present
+;;
+;; Sparse data: NOT every annotator labels every item (see `annotations`), so the
+;; coverage matrix has holes -- exactly the real crowdsourcing regime.
+
+;; ---------- SCALING PARAMETERS ----------
+;; J: number of annotators fit by this instance -- sizes the rates list below.
+;; The item count I (20) is fixed by the number of rows in `annotation-rows`.
+(define n-annotators 3)
+
+;; ---------- Beta priors on the confusion rates ----------
+(define a-tp 2.0) (define b-tp 1.0)   ;; sensitivity  tp ~ Beta(2,1): mildly favour high
+(define a-fp 1.0) (define b-fp 2.0)   ;; false-pos     fp ~ Beta(1,2): mildly favour low
+
+;; an annotation: item index, annotator index (Peano nats), reported label (bool)
+(define-type annotation (Annot any any any))
+
+;; ---------- per-item annotation rows ----------
+;; Row i holds item i's annotations from the I x J prefix of the pool, sliced and
+;; grouped at GENERATION time -- no runtime filtering. A row with no surviving
+;; annotation stays as [] so item i's true-label flip is still drawn: the flip
+;; order (hence the BDD variable order and the posterior) is identical to
+;; filtering the full pool at inference time.
+(define annotation-rows
+  [[(Annot 0 0 false) (Annot 0 1 false)]
+   [(Annot 1 1 false)]
+   [(Annot 2 0 true) (Annot 2 1 true) (Annot 2 2 true)]
+   [(Annot 3 2 true)]
+   [(Annot 4 1 false) (Annot 4 2 true)]
+   [(Annot 5 0 false) (Annot 5 1 false)]
+   [(Annot 6 0 false) (Annot 6 1 false)]
+   []
+   [(Annot 8 2 false)]
+   [(Annot 9 0 true) (Annot 9 2 true)]
+   [(Annot 10 0 true) (Annot 10 1 false) (Annot 10 2 false)]
+   [(Annot 11 0 false) (Annot 11 1 false) (Annot 11 2 false)]
+   [(Annot 12 0 true)]
+   [(Annot 13 2 true)]
+   [(Annot 14 2 false)]
+   [(Annot 15 0 false) (Annot 15 1 false)]
+   [(Annot 16 0 true)]
+   [(Annot 17 0 false) (Annot 17 1 false)]
+   [(Annot 18 1 false) (Annot 18 2 false)]
+   [(Annot 19 2 false)]])
+
+;; one annotator's confusion rates, drawn from the Beta priors.
+(define (draw-rates) (Pair (beta a-tp b-tp) (beta a-fp b-fp)))
+
+;; observe a single annotation of an item whose true label is z: annotator j
+;; says 1 with prob tp_j if z, else fp_j; require that draw to match the
+;; reported label.
+(define (obs-annot z rates a)
+  (match a
+    Annot i j label =>
+      (let ((r (index j rates)))
+        (iff (flip (if z (fst r) (snd r))) label))))
+
+;; conjoin all of one item's annotations given its true label z.
+(define (obs-item z rates as)
+  (match as
+    Nil => (True)
+    Cons a rest => (and (obs-annot z rates a) (obs-item z rates rest))))
+
+;; Walk the per-item rows: draw item i's true label and condition that item's
+;; annotations in the SAME recursion step, then recurse. Interleaving keeps the
+;; BDD variable order linear (each z_i's evidence sorts next to its flip);
+;; drawing all z_i up front and folding over the annotations afterwards
+;; costs ~2^I BDD nodes (the BDD must remember every label across the
+;; block boundary between the z draws and the observations).
+(define (obs-items prevalence rates rows)
+  (match rows
+    Nil => (True)
+    Cons row rest =>
+      (let ((z (flip prevalence)))
+        (and (obs-item z rates row)
+             (obs-items prevalence rates rest)))))
+
+;; Posterior over the FIRST annotator's (sensitivity, false-positive) Beta pair,
+;; marginalising out the unknown true labels z_i (and the other annotators).
+(query dawid-skene
+  (let ((prevalence (beta 1.0 1.0))
+        (rates (map (fn j -> (draw-rates)) (range n-annotators))))
+    (Posterior (fst (index 0 rates)) (obs-items prevalence rates annotation-rows))))

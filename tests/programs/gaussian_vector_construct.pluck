@@ -1,0 +1,6 @@
+; A correlated bivariate Gaussian. Conditioning on x[0] = 1.0 should update
+; the marginal on x[1] to N(0.5, 0.75) under the prior cov {{1, 0.5}, {0.5, 1}}.
+(query
+  (let ((x (gaussian {0.0, 0.0} {{1.0, 0.5}, {0.5, 1.0}})))
+    (Posterior (vector_index x @1)
+               (real_eq (vector_index x @0) 1.0))))

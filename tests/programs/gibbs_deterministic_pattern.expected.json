@@ -1,0 +1,22 @@
+[
+  {
+    "query": "gibbs-deterministic-pattern",
+    "kind": {
+      "result_kind": "samples",
+      "values": [
+        "[True, False, True, False]",
+        "[True, False, True, False]",
+        "[True, False, True, False]",
+        "[True, False, True, False]",
+        "[True, False, True, False]",
+        "[True, False, True, False]",
+        "[True, False, True, False]",
+        "[True, False, True, False]",
+        "[True, False, True, False]",
+        "[True, False, True, False]",
+        "[True, False, True, False]",
+        "[True, False, True, False]"
+      ]
+    }
+  }
+]

@@ -1,0 +1,58 @@
+[
+  {
+    "query": "(let(z(gaussian 0.0 1.0)) (let(c(flip 0.5)) (Posterior c(if c(or(real_eq z 5.0) (real_eq(*. 2.0 z) 10.0)) (real_eq z 5.0)))))",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "False",
+          "log_probability": -0.6931471805599454,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gamma": [],
+            "gaussian": []
+          }
+        },
+        {
+          "display": "True",
+          "log_probability": -0.6931471805599454,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gamma": [],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  },
+  {
+    "query": "(let(z(gaussian 0.0 1.0)) (let(c(flip 0.5)) (Posterior c(if c(or(real_eq(*. 2.0 z) 10.0) (real_eq z 5.0)) (real_eq z 5.0)))))",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "False",
+          "log_probability": -0.6931471805599454,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gamma": [],
+            "gaussian": []
+          }
+        },
+        {
+          "display": "True",
+          "log_probability": -0.6931471805599454,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gamma": [],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

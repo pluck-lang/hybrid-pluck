@@ -1,0 +1,60 @@
+;; Regression test for two related panic modes that arose when different
+;; branches of a model produced different continuous random variables at
+;; the same value-tree position:
+;;
+;;   1. Same-path collision in NamingScheme. Two Dirichlets of different
+;;      arity ended up at the same Path in the world's value tree
+;;      ((Pair n (Pair weights means))'s `weights` slot). The previous
+;;      global flatten step (ResultPositions::flatten) used
+;;      BTreeMap::extend, which dropped one of them. The dropped
+;;      Dirichlet's variable then had no entry in naming.var_names ->
+;;      panic in rename_to_affine_posterior_packet (src/lib.rs).
+;;
+;;   2. Cross-world expression leakage in build_affine_gaussian_blocks.
+;;      Means appear as a Cons-list of length matching `n`, so mu1
+;;      exists in the 2-component branch's value tree but not in the
+;;      1-component branch's. The previous global naming.expr_names
+;;      carried mu1's expression into every world's affine-block
+;;      computation, eventually calling PriorRegistry::gaussian_prior_for
+;;      with a variable that had no block in that world's registry ->
+;;      panic in registry.rs.
+;;
+;; Per-world naming (NamingScheme::derive moved inside the world loop)
+;; makes both invariants hold: each world's naming covers exactly the
+;; variables in that world's value-tree scope.
+
+(define obs [0.3, 2.9])
+
+(define (pick-mean c means)
+  (match means
+    Cons m rest =>
+      (if (native_eq c @0)
+        m
+        (match rest
+          Cons m2 _ => m2))))
+
+(define (gen-obs weights means)
+  (let ((c (categorical weights)))
+    (normal (pick-mean c means) 1.0)))
+
+(query
+ branching
+ (let
+  ((n   (categorical 0.5 0.5))
+   (mu0 (normal 0.0 1.0))
+   (mu1 (normal 0.0 1.0)))
+  (if (native_eq n @0)
+    ;; 1-component branch: Dirichlet of length 1; means = [mu0].
+    (let ((weights (dirichlet 1.0))
+          (means   (Cons mu0 (Nil)))
+          (data    (map (fn i -> (gen-obs weights means))
+                        (range (length obs)))))
+      (Posterior (Pair n (Pair weights means))
+                 (list=? real=? data obs)))
+    ;; 2-component branch: Dirichlet of length 2; means = [mu0, mu1].
+    (let ((weights (dirichlet 1.0 1.0))
+          (means   (Cons mu0 (Cons mu1 (Nil))))
+          (data    (map (fn i -> (gen-obs weights means))
+                        (range (length obs)))))
+      (Posterior (Pair n (Pair weights means))
+                 (list=? real=? data obs))))))

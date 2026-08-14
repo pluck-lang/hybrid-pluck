@@ -1,0 +1,44 @@
+[
+  {
+    "query": "(let((x(gaussian { 0.0 , 0.0 } { { 1.0 , 0.0 } , { 0.0 , 1.0 } })) (I { { 1.0 , 0.0 } , { 0.0 , 1.0 } })) (Posterior(@ I x) True))",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "{x, y}",
+          "log_probability": 0.0,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": [
+              {
+                "var_order": [
+                  "x",
+                  "y"
+                ],
+                "mean": [
+                  [
+                    0.0,
+                    0.0
+                  ],
+                  2,
+                  null
+                ],
+                "cov": [
+                  [
+                    1.0,
+                    0.0,
+                    0.0,
+                    1.0
+                  ],
+                  2,
+                  2
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+]

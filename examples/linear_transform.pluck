@@ -1,0 +1,13 @@
+;; Take a 2D standard Gaussian x ~ N({0, 0}, I) and push it through a
+;; constant 2x2 matrix A = {{2, 1}, {1, -1}} via A @ x.
+;;
+;; Analytic answer: A @ x ~ N(A*0, A * I * A^T) = N({0, 0}, {{5, 1}, {1, 2}}).
+
+(query
+ transformed
+ (let ((x (gaussian {0.0, 0.0}
+                    {{1.0, 0.0},
+                     {0.0, 1.0}}))
+       (A {{2.0, 1.0},
+           {1.0, -1.0}}))
+   (Marginal (@ A x))))

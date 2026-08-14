@@ -1,0 +1,6 @@
+(define (dir-vec-and-index)
+    (let ((p (dirichlet 1.0 1.0 1.0))
+          (p1 (vector_index p @1)))
+    (Posterior (Pair p p1) (not (flip p1)))))
+
+(query dirichlet-vector-and-index (dir-vec-and-index))

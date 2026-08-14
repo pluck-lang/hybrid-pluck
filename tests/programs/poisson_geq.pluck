@@ -1,0 +1,3 @@
+; P(k >= 1 | l) = 1 - e^-l: same posterior as poisson_not_eq,
+; (4/3) Gamma(2,1) - (1/3) Gamma(2,2).
+(query (let ((r (gamma 2.0 1.0))) (Posterior r (native_geq (poisson r) @1))))

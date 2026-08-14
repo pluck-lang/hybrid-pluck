@@ -1,0 +1,18 @@
+; Fully-pinned Gibbs with a non-uniform forced pattern, routed through `map`.
+; The cond `(and a (and (iff b (False)) (and c (iff d (False)))))` pins
+; a=True, b=False, c=True, d=False, so there is no free randomness: every one
+; of the 12 query samples must be the list [True, False, True, False].
+;
+; Unlike gibbs_deterministic_dynamics (all-True), the mixed pattern + the query
+; routing through `map` (App + recursion + CaseOf) exercises the cross-step KC
+; reuse paths, so a cache-reuse bug that corrupts a specific pinned value shows
+; up here as a byte-for-byte snapshot divergence.
+(query
+  gibbs-deterministic-pattern
+  (let ((a (flip 0.5)) (b (flip 0.5)) (c (flip 0.5)) (d (flip 0.5)))
+    (Gibbs
+      (map (fn x -> x) (Cons a (Cons b (Cons c (Cons d (Nil))))))   ; query routes through map (App + recursion)
+      (and a (and (iff b (False)) (and c (iff d (False)))))          ; pins a=T, b=F, c=T, d=F
+      12                                                             ; 3 full cycles over 4 single-site blocks
+      [a, b, c, d]
+      (WithConstant (True)))))

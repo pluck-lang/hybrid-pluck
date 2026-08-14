@@ -1,0 +1,10 @@
+; Disjoint-variable check: the exclusion on Y must NOT block the equality on X.
+; Conditioning on (x=0.3 AND y ≠ 0.7) — both conditions are simultaneously
+; realisable, so the Posterior over `True` is 1.
+(query
+  (let (x (gaussian 0.0 1.0))
+    (let (y (gaussian 0.0 1.0))
+      (Posterior
+        True
+        (and (real_eq x 0.3)
+             (not (real_eq y 0.7)))))))

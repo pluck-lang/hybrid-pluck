@@ -1,0 +1,7 @@
+(define (single-obs-pair-return)
+    (let ((p (dirichlet 1.0 1.0 1.0))
+          (q (dirichlet 1.0 1.0))
+          (p0 (vector_index p @0)))
+    (Posterior (Pair p q) (flip p0))))
+
+(query single-obs-pair-return (single-obs-pair-return))

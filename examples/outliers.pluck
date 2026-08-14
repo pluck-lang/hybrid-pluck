@@ -1,0 +1,32 @@
+;; Robust linear regression.
+;; 
+;; True line y = 2x+1 with planted outliers at
+;; x=4 and x=11. alpha,beta ~ N(0,10); pi ~ Beta(1,1); per-point flip o_n ~ Bern(pi);
+;; y_n ~ N(alpha*x+beta, sigma_{o_n}). Each fixed assignment is a conjugate
+;; Gaussian regression; exact enumerates the 2^N assignments.
+(define xs [1.00, 2.00, 3.00, 4.00, 5.00, 6.00, 7.00, 8.00, 9.00, 10.00, 11.00, 12.00, 13.00, 14.00])
+(define ys [3.00, 5.00, 7.00, 22.00, 11.00, 13.00, 15.00, 17.00, 19.00, 21.00, 5.00, 25.00, 27.00, 29.00])
+
+(define sigma-inlier  0.5)
+(define sigma-outlier 10.0)
+
+;; Draw each point's outlier flag, emit its y, and condition it in the SAME
+;; recursion step. Interleaved conditioning keeps the BDD variable order
+;; linear; drawing all flags first and comparing at the end costs 3*2^N-3
+;; BDD nodes (the BDD must remember every flag across the block boundary).
+(define (points-obs alpha beta pi xs ys)
+  (match xs
+    Nil => (True)
+    Cons x xs =>
+      (match ys
+        Cons y ys =>
+          (and (real=? (if (flip pi)
+                         (normal (+. beta (*. alpha x)) sigma-outlier)
+                         (normal (+. beta (*. alpha x)) sigma-inlier)) y)
+               (points-obs alpha beta pi xs ys)))))
+
+(query outliers
+  (let ((alpha (normal 0.0 10.0))
+        (beta  (normal 0.0 10.0))
+        (pi    (beta 1.0 1.0)))
+    (Posterior alpha (points-obs alpha beta pi xs ys))))

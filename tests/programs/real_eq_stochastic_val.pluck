@@ -1,0 +1,9 @@
+; Regression test: compile_real_eq must compile `expr` and `val` under
+; *distinct* strict_order_index values. The two flips below are distinct
+; random choices with identical parameters at identical relative callstack
+; positions; if both children are compiled at the same index, the flips
+; collapse into a single BDD variable and P(True) = 1 instead of 0.5.
+(query
+  (Marginal
+    (real_eq (if (flip 0.5) 1.0 2.0)
+             (if (flip 0.5) 1.0 2.0))))

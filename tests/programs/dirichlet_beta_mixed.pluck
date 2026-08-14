@@ -1,0 +1,7 @@
+(define (beta-dirichlet-mixed)
+    (let ((b (beta 1.0 1.0))
+          (p (dirichlet 1.0 1.0 1.0))
+          (p0 (vector_index p @0)))
+    (Posterior (Pair b p) (and (flip b) (flip p0)))))
+
+(query beta-dirichlet-mixed (beta-dirichlet-mixed))

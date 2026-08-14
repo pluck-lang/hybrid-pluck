@@ -1,0 +1,7 @@
+; `sum` of a Gaussian-laced vector returns a single GaussianExpr; stdlib
+; `dot` combines elementwise `*.` with `sum` to compute an inner product of
+; a constant vector against a Gaussian vector.
+(query
+  (let ((x (gaussian {0.0, 0.0} {{1.0, 0.0}, {0.0, 1.0}}))
+        (a {1.0, 2.0}))
+    (Posterior (dot a x) (real_eq (sum x) 1.0))))

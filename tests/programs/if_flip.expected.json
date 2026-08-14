@@ -1,0 +1,28 @@
+[
+  {
+    "query": "if-flip",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "False",
+          "log_probability": -0.6931471805599453,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": []
+          }
+        },
+        {
+          "display": "True",
+          "log_probability": -0.6931471805599453,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,55 @@
+;; Second-order HMM
+;;
+;; Like the first-order HMM, but each state depends on the previous TWO
+;; states through their maximum:
+;;   mu_k ~ N(0,1)                              (K shared continuous params)
+;;   z_1  ~ categorical(theta_1)
+;;   z_2  ~ categorical(theta_{z_1})
+;;   z_n  ~ categorical(theta_{max(z_{n-2}, z_{n-1})})   for n >= 3
+;;   y_n  ~ N(mu_{z_n}, 1)
+;;
+;; max over the two native-int states is done with native_leq.
+
+(define (transition prev)
+  (if (native_eq prev @0) (categorical 0.6 0.3 0.1)
+    (if (native_eq prev @1) (categorical 0.2 0.6 0.2)
+      (categorical 0.1 0.3 0.6))))
+
+(define (initial-state) (categorical 0.5 0.3 0.2))
+
+(define (pick-mu z m1 m2 m3)
+  (if (native_eq z @0) m1
+    (if (native_eq z @1) m2 m3)))
+
+(define (nmax a b) (if (native_leq a b) b a))
+
+;; Given the two previous states, draw the next state, condition its emission
+;; against the next observation, and recurse. Interleaved conditioning keeps
+;; the BDD variable order linear (see examples/hmm_first_order.pluck).
+(define (chain-obs zp2 zp1 m1 m2 m3 os)
+  (match os
+    Nil => (True)
+    Cons o os =>
+      (let ((z (transition (nmax zp2 zp1))))
+        (and (real=? (normal (pick-mu z m1 m2 m3) 1.0) o)
+             (chain-obs zp1 z m1 m2 m3 os)))))
+
+;; Entry point: conditions the first two emissions (whose states z1, z2 are
+;; drawn by the caller) then hands the remaining observations to chain-obs.
+(define (chain-obs-start z1 z2 m1 m2 m3 os)
+  (match os
+    Nil => (True)
+    Cons o1 os1 =>
+      (and (real=? (normal (pick-mu z1 m1 m2 m3) 1.0) o1)
+           (match os1
+             Nil => (True)
+             Cons o2 os2 =>
+               (and (real=? (normal (pick-mu z2 m1 m2 m3) 1.0) o2)
+                    (chain-obs z1 z2 m1 m2 m3 os2))))))
+
+(define obs [3.63, 0.12, 4.05, 2.22, 2.74, -0.00, 1.85, 0.77])
+
+(query hmm-second-order
+  (let ((m1 (normal -2.0 1.0)) (m2 (normal 0.0 1.0)) (m3 (normal 2.0 1.0))
+        (z1 (initial-state)) (z2 (transition z1)))
+    (Posterior m1 (chain-obs-start z1 z2 m1 m2 m3 obs))))

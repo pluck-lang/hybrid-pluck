@@ -1,0 +1,28 @@
+[
+  {
+    "query": "(Marginal(real_eq(if(flip 0.5) 1.0 2.0) (if(flip 0.5) 1.0 2.0)))",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "False",
+          "log_probability": -0.6931471805599453,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": []
+          }
+        },
+        {
+          "display": "True",
+          "log_probability": -0.6931471805599453,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

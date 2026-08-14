@@ -1,0 +1,18 @@
+;; title: Beta-Bernoulli
+;; order: 130
+; Conjugate Beta-Bernoulli inference.
+; A Beta(1,1) prior is uniform over [0,1].
+; Conditioning on two True flips updates to Beta(3,1).
+
+(query beta-posterior
+  (let ((p (beta 1.0 1.0)))
+    (let ((x (flip p))
+          (y (flip p)))
+      (Posterior p (and x y)))))
+
+; Simple marginal: P(flip(p)) where p ~ Beta(2, 3)
+; = E[p] = 2/(2+3) = 0.4
+(query beta-marginal
+  (Marginal
+    (let ((p (beta 2.0 3.0)))
+      (flip p))))

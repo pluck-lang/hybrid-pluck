@@ -1,0 +1,17 @@
+; Gaussian analogue of beta_notEq_counts_eq_bug.pluck: the evidence combines
+; two real_eq observations on the same Gaussian variable with a NOT between
+; them, plus a third observation that acts as the "intervening Counts-like"
+; accumulation. The conjunction
+;     (real_eq x 0.3)  ∧  (real_eq x 0.3)  ∧  ¬(real_eq x 0.3)
+; is logically impossible, so P(evidence) = 0 and the posterior must be empty.
+;
+; Without the GaussianObs.excluded fix, the low-edge of the NOT-wrapped
+; real_eq was `spn_one()`, so the chain of merges silently dropped the
+; "x ≠ 0.3" constraint and the query phantom-returned True 1.
+(query
+  (let (x (gaussian 0.0 1.0))
+    (Posterior
+      True
+      (and (real_eq x 0.3)
+           (and (real_eq x 0.3)
+                (not (real_eq x 0.3)))))))

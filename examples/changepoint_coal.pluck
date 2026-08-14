@@ -1,0 +1,71 @@
+;; British coal-mining disasters, annual counts 1851-1961 (111 years, 191
+;; disasters; Jarrett 1979) -- the dataset of Green's (1995) RJMCMC step-function
+;; example. Exact grid-discretized inference: one bin per year, candidate
+;; changepoints at the year boundaries.
+;;   k          ~ discrete prior over {0..3} with weights 1,1,0.5,0.25   (model dimension)
+;;   positions  uniform random k-subset of the year boundaries
+;;   heights    h_g ~ Gamma(alpha, beta)  per-segment intensity (mean 2/yr)
+;;   counts     bin g count ~ Poisson(h_g * 1yr); shared h_g pools the segment
+
+(define counts
+  [@4 @5 @4 @0 @1 @4 @3 @4 @0 @6    ;; 1851-1860
+   @3 @3 @4 @0 @2 @6 @3 @3 @5 @4    ;; 1861-1870
+   @5 @3 @1 @4 @4 @1 @5 @5 @3 @4    ;; 1871-1880
+   @2 @5 @2 @2 @3 @4 @2 @1 @3 @2    ;; 1881-1890
+   @2 @1 @1 @1 @1 @3 @0 @0 @1 @0    ;; 1891-1900
+   @1 @1 @0 @0 @3 @1 @0 @3 @2 @2    ;; 1901-1910
+   @0 @1 @1 @1 @0 @1 @0 @1 @0 @0    ;; 1911-1920
+   @0 @2 @1 @0 @0 @0 @1 @1 @0 @2    ;; 1921-1930
+   @3 @3 @1 @1 @2 @1 @1 @1 @1 @2    ;; 1931-1940
+   @4 @2 @0 @0 @1 @4 @0 @0 @0 @1    ;; 1941-1950
+   @0 @0 @0 @0 @0 @1 @0 @0 @1 @0    ;; 1951-1960
+   @1    ;; 1961-1961
+  ])
+
+;; ---- hyperparameters ----
+(define bin-width 1.0)
+(define alpha 2.0)
+(define beta  1.0)
+
+(define (draw-k) (discrete (0 1) (1 1) (2 0.5) (3 0.25)))
+
+(define (place-cps remaining k-left)
+  (if (== remaining 0)
+    (Nil)
+    (let ((p (/. (float-of-nat k-left) (float-of-nat remaining))))
+      (if (flip p)
+        (Cons (True)  (place-cps (- remaining 1) (- k-left 1)))
+        (Cons (False) (place-cps (- remaining 1) k-left))))))
+
+(define (observe-bins cs h cps)
+  (match cs
+    Nil => (True)
+    Cons c rest =>
+      (and (native_eq (poisson (*. h bin-width)) c)
+           (match rest
+             Nil => (True)
+             Cons _ _ =>
+               (match cps
+                 Cons is-cp cps2 =>
+                   (if is-cp
+                     (observe-bins rest (gamma alpha beta) cps2)
+                     (observe-bins rest h cps2)))))))
+
+(define (cp-indices cps i)
+  (match cps
+    Nil => (Nil)
+    Cons b rest =>
+      (let ((rest2 (cp-indices rest (+ i 1))))
+        (if b (Cons i rest2) rest2))))
+
+
+(define N 30)
+(define data (take N counts))
+(define n-boundaries (- N 1))
+
+;; posterior over the model dimension k (number of changepoints).
+(query num-changepoints
+  (let ((k   (draw-k))
+        (cps (place-cps n-boundaries k))
+        (h0  (gamma alpha beta)))
+    (Posterior k (observe-bins data h0 cps))))

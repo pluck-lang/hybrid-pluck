@@ -1,0 +1,28 @@
+[
+  {
+    "query": "burglary-given-that-mary-called",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "False",
+          "log_probability": -0.002997938571779324,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": []
+          }
+        },
+        {
+          "display": "True",
+          "log_probability": -5.811328964046103,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,39 @@
+[
+  {
+    "query": "(let((x(gaussian 0.0 1.0)) (y(gaussian 0.0 1.0)) (z(gaussian 0.0 1.0))) (Posterior(+. x y) (real_eq(+.(+. x y) z) 1.0)))",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "x",
+          "log_probability": 0.0,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": [
+              {
+                "var_order": [
+                  "x"
+                ],
+                "mean": [
+                  [
+                    0.6666666666666666
+                  ],
+                  1,
+                  null
+                ],
+                "cov": [
+                  [
+                    0.6666666666666669
+                  ],
+                  1,
+                  1
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+]

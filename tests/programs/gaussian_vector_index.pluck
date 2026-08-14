@@ -1,0 +1,7 @@
+; Indexing a multivariate Gaussian yields a `GaussianExpr` usable in
+; `real_eq`. Sum of two correlated components observed equals 2.0; query the
+; full vector so we can see the joint posterior.
+(query
+  (let ((x (gaussian {0.0, 0.0} {{1.0, 0.5}, {0.5, 1.0}})))
+    (Posterior x
+      (real_eq (+. (vector_index x @0) (vector_index x @1)) 2.0))))

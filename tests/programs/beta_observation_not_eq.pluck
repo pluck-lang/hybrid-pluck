@@ -1,0 +1,6 @@
+; Conditioning on x != 0.2 (a measure-1 event under continuous x):
+; posterior on x should remain Beta(2, 2), and the query returns True w.p. 1.
+(query
+  (let (x (beta 2.0 2.0))
+    (Posterior (not (prob_eq x 0.2))
+      True)))

@@ -1,0 +1,180 @@
+;; PCFG with latent production probabilities.
+;;
+;; Every choice point draws from a `categorical` whose weights carry a
+;; Dirichlet(1,...,1) prior; the prior for a rule is bound ONCE (in make-probs)
+;; and shared across every use and every sentence, so production counts pool.
+;; The fixed 100-sentence `sentences` corpus below was generated from known
+;; ground-truth probabilities; N (below) picks how many of them to fit.
+
+(define-type non-terminal (Sent) (NP) (VP) (Verb) (VT) (Det) (Adj) (Noun) (Conj))
+
+;; ---- latent production probabilities ---------------------------------------
+;; One Dirichlet per rule with a real choice, gathered into a bundle `p`.
+;; Indices into `p` (and the alternatives whose probabilities they weight):
+;;   0 Sent      : NP VP              | NP VP Conj Sent
+;;   1 VP        : Verb               | VT NP
+;;   2 Verb      : barks              | eats
+;;   3 Adj       : happy | sad | tasty
+;;   4 Det       : the                | a
+;;   5 Noun      : Adj Noun           | <terminal noun>
+;;   6 Noun-word : cat | dog | bone
+;;   7 Conj      : and                | but
+(define (make-probs)
+  [(dirichlet 1.0 1.0)        ;; 0 Sent
+   (dirichlet 1.0 1.0)        ;; 1 VP
+   (dirichlet 1.0 1.0)        ;; 2 Verb
+   (dirichlet 1.0 1.0 1.0)    ;; 3 Adj
+   (dirichlet 1.0 1.0)        ;; 4 Det
+   (dirichlet 1.0 1.0)        ;; 5 Noun
+   (dirichlet 1.0 1.0 1.0)    ;; 6 Noun-word
+   (dirichlet 1.0 1.0)])      ;; 7 Conj
+
+;; pick alternative 0 of a 2-way rule? `categorical` returns a Native(Int); we
+;; keep the test inside the lazy `if` at each call site so the recursive
+;; Sent/Noun branches are only expanded when actually taken.
+(define (alt0? theta) (native_eq (categorical theta) @0))
+
+(define (generate-english nt p)
+  (match nt
+    Sent => (if (alt0? (index 0 p))
+                (append (generate-english (NP) p) (generate-english (VP) p))
+                (append (append (generate-english (NP) p) (generate-english (VP) p))
+                        (append (generate-english (Conj) p) (generate-english (Sent) p))))
+    Conj => (Cons (if (alt0? (index 7 p)) "and" "but") (Nil))
+    NP => (append (generate-english (Det) p) (generate-english (Noun) p))
+    VP => (if (alt0? (index 1 p))
+              (generate-english (Verb) p)
+              (append (generate-english (VT) p) (generate-english (NP) p)))
+    Verb => (Cons (if (alt0? (index 2 p)) "barks" "eats") (Nil))
+    VT => (Cons "eats" (Nil))
+    Adj => (Cons (let ((c (categorical (index 3 p))))
+                   (if (native_eq c @0) "happy" (if (native_eq c @1) "sad" "tasty")))
+                 (Nil))
+    Det => (Cons (if (alt0? (index 4 p)) "the" "a") (Nil))
+    Noun => (if (alt0? (index 5 p))
+                (append (generate-english (Adj) p) (generate-english (Noun) p))
+                (Cons (let ((c (categorical (index 6 p))))
+                        (if (native_eq c @0) "cat" (if (native_eq c @1) "dog" "bone")))
+                      (Nil)))))
+
+;; ---- observations ----------------------------------------------------------
+(define sentence=? (list=? string=?))
+
+;; evidence: each observed sentence is one the grammar could have produced.
+(define (observe-sentences p sentences)
+  (match sentences
+    Nil => (True)
+    Cons s rest => (and (sentence=? (generate-english (Sent) p) s)
+                        (observe-sentences p rest))))
+
+;; First 100 sentences generated from known ground-truth probabilities.
+(define sentences
+  [["the" "sad" "cat" "eats" "a" "bone" "but" "a" "tasty" "bone" "eats" "a" "bone"]
+   ["the" "cat" "eats" "the" "bone"]
+   ["a" "tasty" "cat" "eats" "the" "bone"]
+   ["a" "sad" "tasty" "bone" "barks"]
+   ["a" "sad" "dog" "eats" "a" "dog"]
+   ["a" "cat" "eats" "the" "dog"]
+   ["the" "dog" "eats" "a" "bone"]
+   ["a" "tasty" "bone" "eats" "a" "cat"]
+   ["a" "bone" "eats"]
+   ["a" "tasty" "happy" "bone" "eats"]
+   ["a" "sad" "bone" "eats" "a" "dog"]
+   ["the" "bone" "barks"]
+   ["the" "tasty" "bone" "barks" "and" "a" "cat" "eats"]
+   ["a" "sad" "dog" "eats" "a" "bone"]
+   ["a" "cat" "eats"]
+   ["the" "cat" "eats" "the" "bone"]
+   ["the" "dog" "barks"]
+   ["a" "cat" "barks"]
+   ["a" "dog" "barks" "but" "the" "sad" "cat" "eats" "the" "dog"]
+   ["the" "cat" "barks"]
+   ["a" "dog" "eats" "the" "bone"]
+   ["the" "bone" "eats" "a" "cat" "but" "a" "tasty" "cat" "barks"]
+   ["the" "bone" "eats"]
+   ["the" "cat" "eats" "a" "dog"]
+   ["the" "happy" "dog" "eats" "a" "tasty" "dog"]
+   ["a" "dog" "eats"]
+   ["the" "happy" "bone" "eats" "the" "tasty" "sad" "dog"]
+   ["the" "happy" "cat" "barks"]
+   ["the" "bone" "eats"]
+   ["the" "dog" "barks" "but" "a" "cat" "eats" "the" "dog" "and" "a" "cat" "eats"]
+   ["the" "bone" "eats"]
+   ["the" "bone" "eats" "a" "sad" "happy" "bone"]
+   ["the" "cat" "eats" "a" "sad" "dog"]
+   ["a" "cat" "barks" "but" "the" "cat" "eats" "the" "happy" "bone"]
+   ["a" "bone" "barks" "but" "the" "tasty" "cat" "barks"]
+   ["a" "bone" "eats" "a" "dog"]
+   ["a" "sad" "dog" "eats" "the" "dog" "but" "the" "sad" "happy" "bone" "eats" "a" "sad" "happy" "bone" "and" "the" "bone" "eats" "a" "cat"]
+   ["the" "cat" "barks"]
+   ["the" "dog" "barks"]
+   ["a" "dog" "eats" "and" "a" "bone" "eats"]
+   ["a" "dog" "eats" "the" "bone" "and" "a" "happy" "bone" "eats" "but" "the" "tasty" "bone" "eats" "the" "sad" "dog"]
+   ["the" "tasty" "dog" "barks" "but" "a" "dog" "barks"]
+   ["the" "tasty" "bone" "eats"]
+   ["a" "bone" "barks"]
+   ["a" "bone" "barks"]
+   ["the" "bone" "barks"]
+   ["a" "dog" "eats"]
+   ["the" "bone" "eats" "the" "dog"]
+   ["the" "happy" "happy" "cat" "eats" "the" "dog"]
+   ["the" "bone" "barks"]
+   ["the" "happy" "cat" "eats" "a" "dog"]
+   ["the" "bone" "barks" "and" "the" "dog" "barks" "and" "the" "tasty" "dog" "eats" "the" "dog"]
+   ["a" "tasty" "tasty" "happy" "cat" "eats" "the" "tasty" "bone" "but" "the" "cat" "eats" "the" "cat"]
+   ["a" "dog" "eats" "the" "bone"]
+   ["the" "dog" "eats" "and" "a" "cat" "barks"]
+   ["the" "dog" "barks"]
+   ["a" "sad" "bone" "eats" "and" "a" "dog" "barks" "but" "a" "dog" "eats" "and" "the" "sad" "bone" "barks"]
+   ["the" "bone" "eats" "and" "the" "tasty" "dog" "barks" "and" "the" "dog" "eats"]
+   ["a" "tasty" "cat" "eats"]
+   ["a" "bone" "eats" "a" "happy" "happy" "sad" "tasty" "dog"]
+   ["a" "cat" "barks" "but" "the" "cat" "barks" "and" "the" "tasty" "dog" "eats"]
+   ["a" "tasty" "sad" "dog" "eats"]
+   ["the" "happy" "dog" "eats" "and" "a" "bone" "barks"]
+   ["a" "bone" "barks"]
+   ["a" "happy" "cat" "eats" "the" "tasty" "tasty" "happy" "dog"]
+   ["a" "bone" "eats"]
+   ["the" "dog" "eats" "a" "sad" "dog"]
+   ["the" "tasty" "dog" "eats"]
+   ["the" "bone" "eats" "a" "bone"]
+   ["the" "dog" "eats" "a" "dog"]
+   ["a" "cat" "barks" "and" "a" "cat" "eats" "a" "sad" "dog"]
+   ["the" "happy" "dog" "eats" "a" "dog" "and" "the" "dog" "eats" "a" "happy" "sad" "happy" "bone"]
+   ["the" "cat" "barks"]
+   ["a" "cat" "barks"]
+   ["a" "cat" "eats"]
+   ["the" "tasty" "cat" "eats" "a" "bone"]
+   ["a" "tasty" "dog" "barks"]
+   ["a" "cat" "eats" "and" "the" "bone" "barks" "and" "the" "dog" "barks"]
+   ["the" "bone" "eats" "a" "tasty" "cat"]
+   ["the" "tasty" "tasty" "dog" "eats" "the" "cat" "and" "the" "dog" "eats" "but" "a" "cat" "eats" "a" "tasty" "dog"]
+   ["a" "cat" "eats" "the" "happy" "tasty" "bone" "and" "a" "dog" "eats" "and" "the" "dog" "barks" "but" "a" "happy" "cat" "eats" "a" "dog" "but" "a" "bone" "eats" "a" "dog"]
+   ["a" "cat" "eats" "the" "cat"]
+   ["a" "dog" "eats" "and" "a" "bone" "barks" "but" "a" "dog" "eats" "a" "dog"]
+   ["a" "bone" "eats" "the" "tasty" "cat" "but" "a" "sad" "bone" "eats"]
+   ["the" "cat" "eats"]
+   ["the" "sad" "tasty" "bone" "eats" "a" "dog"]
+   ["a" "cat" "barks"]
+   ["the" "dog" "eats" "the" "dog"]
+   ["a" "cat" "eats" "a" "happy" "dog" "and" "a" "tasty" "dog" "eats"]
+   ["a" "bone" "eats"]
+   ["the" "happy" "dog" "eats"]
+   ["the" "bone" "barks"]
+   ["a" "cat" "eats" "the" "tasty" "tasty" "sad" "happy" "cat"]
+   ["a" "cat" "eats" "the" "bone"]
+   ["a" "bone" "barks" "but" "the" "sad" "sad" "dog" "barks"]
+   ["the" "happy" "bone" "eats" "a" "tasty" "cat"]
+   ["the" "bone" "eats" "the" "sad" "happy" "bone" "but" "a" "bone" "eats"]
+   ["the" "happy" "happy" "bone" "eats"]
+   ["the" "bone" "barks"]
+   ["the" "bone" "eats" "the" "dog" "but" "the" "cat" "eats" "the" "cat"]])
+
+;; how many of the first 100 sentences to fit (N=10 -> first 10).
+(define N 80)
+
+;; Query a SINGLE production probability P(Sent -> NP VP) = first component of the
+;; Sent-rule Dirichlet (p index 0).
+(query learned-probabilities
+  (let ((p (make-probs)))
+    (Posterior (vector_index (index 0 p) @0) (observe-sentences p (take N sentences)))))

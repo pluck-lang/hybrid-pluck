@@ -1,0 +1,40 @@
+[
+  {
+    "query": "(let(z(gaussian 0.0 1.0)) (Posterior z(and(real_eq z 5.0) (not(real_eq(*. 2.0 z) 10.0)))))",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "x",
+          "log_probability": 0.0,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gamma": [],
+            "gaussian": [
+              {
+                "var_order": [
+                  "x"
+                ],
+                "mean": [
+                  [
+                    5.0
+                  ],
+                  1,
+                  null
+                ],
+                "cov": [
+                  [
+                    0.0
+                  ],
+                  1,
+                  1
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "query": "(let((r(gamma 2.0 1.0))) (Posterior r(native_leq(poisson r) @1)))",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "λ",
+          "log_probability": 0.0,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gamma": [
+              {
+                "gamma": {
+                  "Mixture": {
+                    "name": "λ",
+                    "mixture": [
+                      [
+                        {
+                          "n": 1.0,
+                          "c": 2.0
+                        },
+                        {
+                          "log_w": 0.6931471805599452,
+                          "sign": 1
+                        }
+                      ],
+                      [
+                        {
+                          "n": 2.0,
+                          "c": 2.0
+                        },
+                        {
+                          "log_w": 0.6931471805599443,
+                          "sign": 1
+                        }
+                      ]
+                    ]
+                  }
+                },
+                "poisson": {},
+                "exponential": {}
+              }
+            ],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

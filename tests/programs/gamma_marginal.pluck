@@ -1,0 +1,2 @@
+; A Gamma prior passes through a marginal query unchanged.
+(query (Marginal (gamma 2.0 1.0)))

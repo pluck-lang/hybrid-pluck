@@ -1,0 +1,16 @@
+; Sum of two geometric random variables
+; What is the posterior distribution given the sum < 5?
+(define (generate-number p)
+  (+ (geom p) (geom 0.2)))
+
+(query
+ num-greater-than-five
+ (Marginal
+  (> (generate-number 0.7) 5)))
+
+(query
+ posterior-given-less-than-five
+ (let ((n (generate-number 0.7)))
+   (Posterior
+    n
+    (< n 5))))

@@ -1,0 +1,63 @@
+;; Polynomial Regression
+
+(define xs [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+(define ys [1.3998703068665284, 6.235613006596935, 14.930938208255952, 27.76621455275837, 44.63428250334452, 65.39877806912918, 90.16345175668341, 118.94703945597995, 151.7909055407857, 188.5411680368732])
+
+; Generate a random polynomial with degree drawn from
+; a truncated Geometric distribution, with parameter p
+; and maximum degree max-degree. Each coefficient is
+; independently drawn from N(0, 100).
+(define (random-polynomial p max-degree)
+  (match max-degree
+    O => []
+    S n => (if (flip p)
+             (Nil)
+             (Cons (normal 0.0 100.0) 
+                   (random-polynomial p n)))))
+
+(define (evaluate-polynomial coeffs x)
+  (match coeffs
+    Nil => 0.0
+    Cons c cs => (+. c (*. x (evaluate-polynomial cs x)))))
+
+(define-type outlier-model (None) (One) (All))
+
+(define (generate-outliers model)
+  (match model
+    None => (map (fn _ -> false) xs)
+    One => (let ((i (uniform 0 1 2 3 4 5 6 7 8 9))) 
+             (map (fn j -> (nat=? i j)) (range (length xs))))
+    All => (let ((p (beta 1.0 1.0))) (map (fn _ -> (flip p)) xs))))
+
+(define (describe-degree n)
+  (index n ["Zero", "Constant", "Linear", "Quadratic", "Cubic", "Quartic", "Quintic"]))
+
+(define-type sample (Trace curve outliers data))
+
+(define (zip xs ys)
+  (match xs
+    Nil => []
+    Cons x xs => (Cons (Pair x (car ys))
+                       (zip xs (cdr ys)))))
+
+(define (model outlier-model)
+  (let
+    ((curve (random-polynomial 0.3 5))
+     (outliers (generate-outliers outlier-model))
+     (data (map (fn xo -> (if (snd xo) 
+                            (normal 0.0 200.0) 
+                            (normal (evaluate-polynomial curve (fst xo)) 1.0)))
+                (zip xs outliers))))
+    (Trace curve outliers data)))
+
+(define (true-indices xs)
+  (match xs
+    Nil => (Nil)
+    Cons x xs => 
+      (let ((rest (map (fn x -> (+ x 1)) (true-indices xs))))
+        (if x (Cons 0 rest) rest))))
+
+(query infer-params
+  (match (model (One))
+    Trace curve outliers data => 
+      (Posterior (index 0 outliers) (list=? real=? data ys))))

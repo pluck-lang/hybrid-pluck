@@ -1,0 +1,20 @@
+[
+  {
+    "query": "(Marginal(real_eq(gamma 2.0 1.0) -1.0))",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "False",
+          "log_probability": 0.0,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gamma": [],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

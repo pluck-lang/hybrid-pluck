@@ -1,0 +1,5 @@
+; Conditioning on x=0.3 and asking if x=0.2: must be False w.p. 1.
+(query
+  (let (x (beta 1.0 1.0))
+    (Posterior (prob_eq x 0.2)
+      (prob_eq x 0.3))))

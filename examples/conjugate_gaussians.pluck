@@ -1,0 +1,17 @@
+;; Port of psi-programs/conjugate_gaussians.psi and hybit-programs/conjugate_gaussians.jl.
+;;
+;;   a ~ N(0, 1)
+;;   observe N(a, 1) == 1
+;;   observe N(a, 1) == 2
+;;   query: posterior of a
+;;
+;; A textbook Gaussian-Gaussian conjugate update. The two continuous
+;; observations are exact-equality conditionings on Gaussian draws, which pluck
+;; disintegrates analytically (no inequality / truncation needed). The posterior
+;; is exact: precision 1 (prior) + 1 + 1 = 3, so a | data ~ N((0+1+2)/3, 1/3) = N(1, 0.5774).
+
+(query conjugate_gaussians
+  (let ((a (normal 0.0 1.0)))
+    (Posterior a
+      (and (real=? (normal a 1.0) 1.0)
+           (real=? (normal a 1.0) 2.0)))))

@@ -1,0 +1,11 @@
+; The "punctured slab": conditioning on (z = 5 AND 2z ≠ 10) looks
+; pointwise contradictory, but under the ε-limit semantics it is not:
+; the exclusion's slab (ε/2 wide in 2z, i.e. ε/4 in z) is strictly
+; narrower than the equality's (ε/2 in z), so the acceptance region is
+; an annulus of width ε/2 whose weak limit is still δ₅. The evidence
+; carries half the count of a plain (real_eq z 5.0), and the posterior
+; over z is Dirac(5) — NOT the zero measure.
+(query
+  (let (z (gaussian 0.0 1.0))
+    (Posterior z (and (real_eq z 5.0)
+                      (not (real_eq (*. 2.0 z) 10.0))))))

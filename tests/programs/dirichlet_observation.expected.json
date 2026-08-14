@@ -1,0 +1,19 @@
+[
+  {
+    "query": "(let(p(dirichlet 1.0 1.0 1.0)) (Posterior(dirichlet_eq p { 0.2 , 0.3 , 0.5 }) (dirichlet_eq p { 0.2 , 0.3 , 0.5 })))",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "True",
+          "log_probability": 0.0,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

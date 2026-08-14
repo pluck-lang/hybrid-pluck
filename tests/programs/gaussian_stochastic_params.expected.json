@@ -1,0 +1,126 @@
+[
+  {
+    "query": "(Posterior(gaussian(if(flip 0.5) 0.0 3.0) (if(flip 0.5) 1.0 2.0)) True)",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "x",
+          "log_probability": -1.3862943611198908,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": [
+              {
+                "var_order": [
+                  "x"
+                ],
+                "mean": [
+                  [
+                    0.0
+                  ],
+                  1,
+                  null
+                ],
+                "cov": [
+                  [
+                    1.0
+                  ],
+                  1,
+                  1
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "display": "x",
+          "log_probability": -1.3862943611198908,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": [
+              {
+                "var_order": [
+                  "x"
+                ],
+                "mean": [
+                  [
+                    0.0
+                  ],
+                  1,
+                  null
+                ],
+                "cov": [
+                  [
+                    4.0
+                  ],
+                  1,
+                  1
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "display": "x",
+          "log_probability": -1.3862943611198908,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": [
+              {
+                "var_order": [
+                  "x"
+                ],
+                "mean": [
+                  [
+                    3.0
+                  ],
+                  1,
+                  null
+                ],
+                "cov": [
+                  [
+                    1.0
+                  ],
+                  1,
+                  1
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "display": "x",
+          "log_probability": -1.3862943611198908,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": [
+              {
+                "var_order": [
+                  "x"
+                ],
+                "mean": [
+                  [
+                    3.0
+                  ],
+                  1,
+                  null
+                ],
+                "cov": [
+                  [
+                    4.0
+                  ],
+                  1,
+                  1
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+]

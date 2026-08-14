@@ -1,0 +1,3 @@
+; P(x < 0.5 | l) = 1 - e^{-0.5 l}: the posterior is the signed mixture
+; 1.8 Gamma(2,1) - 0.8 Gamma(2,1.5)  (Z = 5/9).
+(query (let ((r (gamma 2.0 1.0))) (Posterior r (real_lt (exponential r) 0.5))))

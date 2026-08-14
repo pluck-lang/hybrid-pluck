@@ -1,0 +1,8 @@
+(define (two-dirichlet-probs)
+    (let ((p (dirichlet 1.0 1.0 1.0))
+          (q (dirichlet 1.0 1.0))
+          (p0 (vector_index p @0))
+          (q0 (vector_index q @0)))
+    (Posterior (Pair p0 q0) (and (flip p0) (flip q0)))))
+
+(query dirichlet-two-probabilities (two-dirichlet-probs))

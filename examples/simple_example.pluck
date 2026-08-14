@@ -1,0 +1,22 @@
+;; Example program from docs/a_simple_example.md
+
+;; Define a function with parameter p.
+(define (generate-number p)
+    ;; flip a coin with probability p
+    ;; if true, sample from a normal distribution with higher mean and variance
+    ;; if false, sample from a normal distribution with lower mean and variance
+    (let ((hi (flip p)))
+        (if hi (normal 2.0 2.0) (normal 0.0 1.0))))
+
+;; Example query:
+;; Posterior distribution of probability p,
+;; given that the number is equal to one.
+(query 
+  ;; Query name:
+  posterior-given-equal-to-one
+  ;; Query:
+  (let ((p (beta 1.0 1.0)))
+    ;; Compute the exact posterior P(p | x = 1)
+    (Posterior 
+      p 
+      (real_eq (generate-number p) 1.0))))

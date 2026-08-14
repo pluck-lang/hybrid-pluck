@@ -1,0 +1,28 @@
+[
+  {
+    "query": "(let((p(dirichlet 1.0 1.0)) (c(categorical p))) (Posterior c(dirichlet_eq p { 0.2 , 0.8 })))",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "1",
+          "log_probability": -0.22314355131420976,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": []
+          }
+        },
+        {
+          "display": "0",
+          "log_probability": -1.6094379124341003,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,19 @@
+[
+  {
+    "query": "(let((m(*. 0.0 {(gaussian 0.0 1.0) ,(gaussian 0.0 1.0) }))) (Posterior m True))",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "{0, 0}",
+          "log_probability": 0.0,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

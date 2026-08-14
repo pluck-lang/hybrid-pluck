@@ -1,0 +1,2 @@
+; Gamma support is (0, inf): observing a non-positive value is False w.p. 1.
+(query (Marginal (real_eq (gamma 2.0 1.0) -1.0)))

@@ -1,0 +1,37 @@
+[
+  {
+    "query": "cat-marginal",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "1",
+          "log_probability": -0.6931471805599454,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": []
+          }
+        },
+        {
+          "display": "0",
+          "log_probability": -1.2039728043259361,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": []
+          }
+        },
+        {
+          "display": "2",
+          "log_probability": -1.6094379124341005,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

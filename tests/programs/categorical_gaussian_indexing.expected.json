@@ -1,0 +1,112 @@
+[
+  {
+    "query": "transformed",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "{x, y, y}",
+          "log_probability": -0.6693660175030649,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": [
+              {
+                "var_order": [
+                  "x",
+                  "y"
+                ],
+                "mean": [
+                  [
+                    0.0,
+                    1.0
+                  ],
+                  2,
+                  null
+                ],
+                "cov": [
+                  [
+                    4.0,
+                    -6.0,
+                    -6.0,
+                    11.75
+                  ],
+                  2,
+                  2
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "display": "{x, y, y}",
+          "log_probability": -1.1801916412690554,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": [
+              {
+                "var_order": [
+                  "x",
+                  "y"
+                ],
+                "mean": [
+                  [
+                    0.0,
+                    1.0
+                  ],
+                  2,
+                  null
+                ],
+                "cov": [
+                  [
+                    16.0,
+                    6.0,
+                    6.0,
+                    5.0
+                  ],
+                  2,
+                  2
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "display": "{x, y, y}",
+          "log_probability": -1.7106567493772196,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": [
+              {
+                "var_order": [
+                  "x",
+                  "y"
+                ],
+                "mean": [
+                  [
+                    1.0,
+                    -0.25
+                  ],
+                  2,
+                  null
+                ],
+                "cov": [
+                  [
+                    16.0,
+                    5.0,
+                    5.0,
+                    7.75
+                  ],
+                  2,
+                  2
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+]

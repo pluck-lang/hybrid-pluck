@@ -1,0 +1,12 @@
+;; A tiny two-feature linear regression done with FloatMatrix + stdlib `dot`.
+;; The design row is a constant FloatMatrix `{1.0, 2.0}`; weights are a
+;; bivariate Gaussian. The observation `(dot weights x_row) = 5.3` constrains
+;; the joint posterior on `w0`, `w1`.
+
+(query
+ regression
+ (let ((w (gaussian {0.0, 0.0}
+                    {{1.0, 0.0},
+                     {0.0, 1.0}}))
+       (x_row {1.0, 2.0}))
+   (Posterior w (real_eq (dot w x_row) 5.3))))

@@ -1,0 +1,19 @@
+[
+  {
+    "query": "(let(x(beta 2.0 2.0)) (Posterior(not(prob_eq x 0.2)) True))",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "True",
+          "log_probability": 0.0,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

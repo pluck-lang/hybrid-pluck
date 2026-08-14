@@ -1,0 +1,21 @@
+;; A textbook Bayesian linear regression:
+;;
+;;   a ~ N(0, 10)                 (intercept)
+;;   b ~ N(0, 10)                 (slope)
+;;   observe N(a + b*x_i, 1) == y_i   for each data point
+;;   query: posterior of a
+;;
+;; This is a pure linear-Gaussian model (no discrete latents), so pluck
+;; disintegrates the equality observations analytically and reports the exact
+;; marginal posterior of the intercept a in a single run. The data below was
+;; generated from y = 2 + 3x + N(0, 1), so the posterior concentrates near
+;; a ~= 2.
+
+(define xs [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0])
+(define ys [4.855909670422071, 7.827096399668481, 10.888684138432337, 14.701983725098863, 16.872411716217112, 18.502646585659043, 23.332318344067716, 25.73266252150283, 28.783041315854806, 32.11588478670085])
+
+(query linear_regression
+  (let ((a (normal 0.0 10.0))
+        (b (normal 0.0 10.0)))
+    (Posterior a
+      (list=? real=? (map (fn x -> (normal (+. a (*. b x)) 1.0)) xs) ys))))

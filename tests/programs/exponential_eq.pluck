@@ -1,0 +1,2 @@
+; Gamma-Exponential conjugacy: Gamma(2,1) + draw x = 0.5 => Gamma(3, 1.5).
+(query (let ((r (gamma 2.0 1.0))) (Posterior r (real_eq (exponential r) 0.5))))

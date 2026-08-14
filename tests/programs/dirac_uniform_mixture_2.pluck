@@ -1,0 +1,5 @@
+; Should be the same result as dirac_uniform_mixture_1
+(query 
+  (let ((z (beta 1.0 1.0))
+        (xy (if (prob_eq z 0.5) (Pair 0.5 0.5) (Pair (beta 1.0 1.0) (beta 1.0 1.0)))))
+    (Posterior (snd xy) (prob_eq (fst xy) 0.5))))

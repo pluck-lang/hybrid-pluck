@@ -1,0 +1,2 @@
+; The AND of two independent coin flips
+(query coin-and (Marginal (and (flip 0.5) (flip 0.3))))

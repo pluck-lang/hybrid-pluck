@@ -1,0 +1,9 @@
+; Pin a Dirichlet vector via `dirichlet_eq`, then query a downstream
+; categorical drawn from the same vector. The categorical's posterior should
+; match the pinned vector's components exactly: P(c=0)=0.2, P(c=1)=0.8.
+; Exercises the `Pinned` Dirichlet prior flowing through a categorical
+; (the `Counts × Pinned` posterior path).
+(query
+  (let ((p (dirichlet 1.0 1.0))
+        (c (categorical p)))
+    (Posterior c (dirichlet_eq p {0.2, 0.8}))))

@@ -1,0 +1,101 @@
+;; Cube SLAM with known rotations.
+;;
+;; A robot views an 8-vertex cube from up to 5 poses. Pose ROTATIONS are fixed
+;; to their (front-end) values, which makes the measurement model
+;;     z_ij = R_i^T (l_j - t_i)            [vertex j seen from pose i]
+;; linear in the unknowns, so the whole pose graph is one big Gaussian that
+;; pluck solves exactly. The query files choose how many poses to use (n-poses)
+;; and jointly estimate the 8 cube-vertex world positions and robot translations.
+;; Data (rotations / measurements / odometry) lives below;
+;; ---- small helpers --------------------------------------------------
+(define (iso3 mean var)                       ; isotropic 3-D Gaussian
+  (gaussian mean {{var, 0.0, 0.0}, {0.0, var, 0.0}, {0.0, 0.0, var}}))
+(define (add-noise v var) (+. v (iso3 {0.0, 0.0, 0.0} var)))
+(define (vec3=? a b)                          ; observe two 3-vectors are equal
+  (and (real_eq (vector_index a @0) (vector_index b @0))
+       (and (real_eq (vector_index a @1) (vector_index b @1))
+            (real_eq (vector_index a @2) (vector_index b @2)))))
+(define (all? bs) (all (fn b -> b) bs))
+(define (concat xss)
+  (match xss Nil => [] Cons xs rest => (append xs (concat rest))))
+
+;; ---- DATA -----------------------------------------------------------
+(define LM-VAR  0.02250)        ; landmark measurement variance (0.15^2)
+(define ODO-VAR 0.25000)        ; odometry  measurement variance (0.5^2)
+(define PRIOR-VAR 10000.0)            ; broad (uninformative) prior, std = 100
+
+;; known rotations R_i^T (world<-frame), one constant 3x3 per pose
+(define rotations
+  [{{1.00000, 0.00000, 0.0},
+     {-0.00000, 1.00000, 0.0},
+     {0.0, 0.0, 1.0}},
+    {{0.86603, 0.50000, 0.0},
+     {-0.50000, 0.86603, 0.0},
+     {0.0, 0.0, 1.0}},
+    {{0.50000, 0.86603, 0.0},
+     {-0.86603, 0.50000, 0.0},
+     {0.0, 0.0, 1.0}},
+    {{0.25882, 0.96593, 0.0},
+     {-0.96593, 0.25882, 0.0},
+     {0.0, 0.0, 1.0}},
+    {{0.17365, 0.98481, 0.0},
+     {-0.98481, 0.17365, 0.0},
+     {0.0, 0.0, 1.0}}])
+
+;; pose-1 world translation, held fixed as the SLAM anchor
+(define anchor {-12.00000, 0.00000, 0.00000})
+
+;; landmark measurements: for each pose, the 8 cube vertices in local frame
+(define measurements
+  [[{12.11865, 7.86359, 8.21042}, {11.78972, 0.08803, 8.32857}, {11.85142, -0.08494, 0.01495}, {11.92448, 7.76740, 0.01028}, {19.84065, 8.07104, 7.86209}, {20.23249, -0.11749, 7.95169}, {20.12203, -0.18463, 0.03412}, {20.19607, 7.75888, 0.02770}],
+    [{14.69924, 5.50958, 7.81446}, {10.46219, -1.45761, 8.04455}, {10.69783, -1.48393, -0.10200}, {14.69509, 5.43627, -0.10715}, {21.86832, 1.46338, 7.82130}, {17.68694, -5.68210, 8.11806}, {17.76225, -5.65900, 0.14451}, {21.65037, 1.51561, 0.28452}],
+    [{17.81960, 0.95874, 7.86657}, {10.80583, -2.93977, 8.05117}, {10.96971, -2.80413, 0.00195}, {18.07444, 1.03210, 0.40803}, {21.95026, -5.98498, 7.83937}, {15.00057, -9.88993, 8.10710}, {14.99919, -9.86733, -0.12702}, {21.62918, -5.92338, 0.12846}],
+    [{20.38591, 1.12582, 8.02598}, {12.68418, -0.89045, 8.02306}, {12.63512, -0.92932, 0.05367}, {20.43791, 1.47514, 0.15807}, {22.21769, -6.55540, 8.07726}, {14.77401, -8.40802, 8.57791}, {14.78257, -8.31495, 0.14310}, {22.52205, -6.46202, 0.11385}],
+    [{23.51946, 4.13203, 7.92720}, {15.76921, 3.12557, 7.71991}, {15.85986, 2.53646, -0.07079}, {23.79873, 4.17720, -0.16166}, {24.91728, -3.60897, 7.89045}, {17.17858, -5.09326, 7.90226}, {17.46770, -5.00500, -0.30377}, {25.05254, -3.81017, 0.12787}]])
+
+;; odometry: measured relative translation  d_i = R_i^T (t_next - t_i)
+(define odometry [{1.60374, -4.05737, 0.25249}, {0.16493, -5.06425, -0.16725}, {-1.70157, -5.79077, 0.88273}, {-2.62594, -5.52942, 0.45893}])
+
+;; ---- MODEL ----------------------------------------------------------
+;; cube prior: 8 vertices, each a broad isotropic Gaussian in world space
+(define (cube-prior) (map (fn _ -> (iso3 {0.0, 0.0, 0.0} PRIOR-VAR)) (range 8)))
+
+;; free robot translation: x,y broad, z pinned ~0 (planar motion).
+;; NB: built with `gaussian` (independent components) -- two identical inline
+;; `(normal ..)` entries in a {..} literal would collapse to ONE shared RV.
+(define (free-pose)
+  (gaussian {0.0, 0.0, 0.0}
+            {{PRIOR-VAR, 0.0, 0.0}, {0.0, PRIOR-VAR, 0.0}, {0.0, 0.0, 0.0001}}))
+;; n poses total: the fixed anchor (pose 1) plus n-1 free poses.
+(define (robot-poses n) (Cons anchor (map (fn _ -> (free-pose)) (range (- n 1)))))
+
+;; predicted local measurement of vertex l from a pose (rotation Rt, translation t)
+(define (predict Rt t l) (@ Rt (-. l t)))
+
+;; all 8 landmark observations from one pose
+(define (frame-ok Rt t cube meas)
+  (all? (zip_with (fn l m -> (vec3=? (add-noise (predict Rt t l) LM-VAR) m)) cube meas)))
+
+(define (landmarks-ok cube poses)
+  (all? (mapi (fn t i -> (frame-ok (index i rotations) t cube (index i measurements)))
+              poses)))
+
+;; odometry ties consecutive poses:  d_i ~ R_i^T (t_{i+1} - t_i)
+;; `odo` is the (n-1)-long odometry prefix supplied by the query.
+(define (odometry-ok poses odo)
+  (all? (mapi (fn d i -> (vec3=? (add-noise (predict (index i rotations)
+                                                     (index i poses)
+                                                     (index (S i) poses)) ODO-VAR) d))
+              odo)))
+
+(define (xyz v) [(vector_index v @0), (vector_index v @1), (vector_index v @2)])
+
+(define n-poses 5)
+
+(query cube-slam
+ (let ((cube  (cube-prior))
+       (poses (robot-poses n-poses)))
+   (Posterior
+    (map xyz cube)
+    (and (landmarks-ok cube poses)
+         (odometry-ok  poses (take (- n-poses 1) odometry))))))

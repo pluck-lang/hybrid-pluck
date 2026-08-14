@@ -1,0 +1,27 @@
+;; Port of Alea.jl/benchmarks/clinicalTrial2.jl
+;;
+;; isEffective ~ Bernoulli(0.5). The treated group's success prob is
+;; probIfTreated ~ Uniform[0,1]; the control group's is a *separate*
+;; Uniform[0,1] if the treatment is effective, else it shares probIfTreated.
+;; We observe the 5 control / 5 treated outcomes, condition on isEffective,
+;; and return the posterior over probIfControl.
+;;
+;; Uniform[0,1] is expressed as Beta(1,1) (its exact equivalent).
+
+(define (obs-flip p y) (iff (flip p) y))
+(define (obs-all p ys)
+  (match ys
+    Nil => (True)
+    Cons y rest => (and (obs-flip p y) (obs-all p rest))))
+
+(define control [false, false, true, false, false])
+(define treated [true, false, true, true, true])
+
+(query clinicalTrial2
+  (let ((isEffective (flip 0.5))
+        (probIfTreated (beta 1.0 1.0))
+        (probIfControl (if isEffective (beta 1.0 1.0) probIfTreated)))
+    (Posterior probIfControl
+      (and isEffective
+        (and (obs-all probIfControl control)
+             (obs-all probIfTreated treated))))))

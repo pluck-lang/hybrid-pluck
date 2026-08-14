@@ -1,0 +1,7 @@
+; The identity matmul should leave a Gaussian vector unchanged. The off-
+; diagonal zero entries of `I` must short-circuit cleanly (no spurious
+; coefficients), so the queried matrix is bit-for-bit equivalent to `x`.
+(query
+  (let ((x (gaussian {0.0, 0.0} {{1.0, 0.0}, {0.0, 1.0}}))
+        (I {{1.0, 0.0}, {0.0, 1.0}}))
+    (Posterior (@ I x) True)))

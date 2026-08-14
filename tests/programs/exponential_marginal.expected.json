@@ -1,0 +1,41 @@
+[
+  {
+    "query": "(Marginal(exponential 2.0))",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "λ",
+          "log_probability": 0.0,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gamma": [
+              {
+                "gamma": {
+                  "Pinned": {
+                    "name": "rate_0",
+                    "value": 2.0
+                  }
+                },
+                "poisson": {},
+                "exponential": {
+                  "λ": {
+                    "constraint": {
+                      "Interval": {
+                        "geq": 0.0,
+                        "lt": null
+                      }
+                    },
+                    "scale": 1.0
+                  }
+                }
+              }
+            ],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

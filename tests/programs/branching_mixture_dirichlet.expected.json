@@ -1,0 +1,270 @@
+[
+  {
+    "query": "branching",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "(0, (p, [x]))",
+          "log_probability": -0.7444520275772524,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [
+              {
+                "name": "p",
+                "alphas": [
+                  1.0
+                ]
+              }
+            ],
+            "gaussian": [
+              {
+                "var_order": [
+                  "x"
+                ],
+                "mean": [
+                  [
+                    1.0666666666666664
+                  ],
+                  1,
+                  null
+                ],
+                "cov": [
+                  [
+                    0.3333333333333335
+                  ],
+                  1,
+                  1
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "display": "(1, (p, [x₀, x₁]))",
+          "log_probability": -1.8430643162453597,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [
+              {
+                "name": "p",
+                "alphas": [
+                  1.0,
+                  3.0
+                ]
+              }
+            ],
+            "gaussian": [
+              {
+                "var_order": [
+                  "x₀"
+                ],
+                "mean": [
+                  [
+                    0.0
+                  ],
+                  1,
+                  null
+                ],
+                "cov": [
+                  [
+                    1.0
+                  ],
+                  1,
+                  1
+                ]
+              },
+              {
+                "var_order": [
+                  "x₁"
+                ],
+                "mean": [
+                  [
+                    1.0666666666666664
+                  ],
+                  1,
+                  null
+                ],
+                "cov": [
+                  [
+                    0.3333333333333335
+                  ],
+                  1,
+                  1
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "display": "(1, (p, [x₀, x₁]))",
+          "log_probability": -1.8430643162453597,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [
+              {
+                "name": "p",
+                "alphas": [
+                  3.0,
+                  1.0
+                ]
+              }
+            ],
+            "gaussian": [
+              {
+                "var_order": [
+                  "x₀"
+                ],
+                "mean": [
+                  [
+                    1.0666666666666664
+                  ],
+                  1,
+                  null
+                ],
+                "cov": [
+                  [
+                    0.3333333333333335
+                  ],
+                  1,
+                  1
+                ]
+              },
+              {
+                "var_order": [
+                  "x₁"
+                ],
+                "mean": [
+                  [
+                    0.0
+                  ],
+                  1,
+                  null
+                ],
+                "cov": [
+                  [
+                    1.0
+                  ],
+                  1,
+                  1
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "display": "(1, (p, [x₀, x₁]))",
+          "log_probability": -2.261719199697864,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [
+              {
+                "name": "p",
+                "alphas": [
+                  2.0,
+                  2.0
+                ]
+              }
+            ],
+            "gaussian": [
+              {
+                "var_order": [
+                  "x₀"
+                ],
+                "mean": [
+                  [
+                    0.15
+                  ],
+                  1,
+                  null
+                ],
+                "cov": [
+                  [
+                    0.5
+                  ],
+                  1,
+                  1
+                ]
+              },
+              {
+                "var_order": [
+                  "x₁"
+                ],
+                "mean": [
+                  [
+                    1.45
+                  ],
+                  1,
+                  null
+                ],
+                "cov": [
+                  [
+                    0.5
+                  ],
+                  1,
+                  1
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "display": "(1, (p, [x₀, x₁]))",
+          "log_probability": -2.261719199697864,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [
+              {
+                "name": "p",
+                "alphas": [
+                  2.0,
+                  2.0
+                ]
+              }
+            ],
+            "gaussian": [
+              {
+                "var_order": [
+                  "x₀"
+                ],
+                "mean": [
+                  [
+                    1.45
+                  ],
+                  1,
+                  null
+                ],
+                "cov": [
+                  [
+                    0.5
+                  ],
+                  1,
+                  1
+                ]
+              },
+              {
+                "var_order": [
+                  "x₁"
+                ],
+                "mean": [
+                  [
+                    0.15
+                  ],
+                  1,
+                  null
+                ],
+                "cov": [
+                  [
+                    0.5
+                  ],
+                  1,
+                  1
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+]

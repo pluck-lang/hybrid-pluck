@@ -1,0 +1,13 @@
+(define obs [0.3, 1.2, 2.2, 5.4, 2.9, 1.2, 0.3, 4.4])
+
+(define-type Params (Params p mu1 mu2))
+
+(query
+ mixture
+ (let
+  ((p (beta 1.0 1.0))
+   (mu1 (normal 0.0 1.0))
+   (mu2 (normal 0.0 1.0))
+   (cs (map (fn i -> (flip p)) (range (length obs))))
+   (data (map (fn c -> (normal (if c mu1 mu2) 0.5)) cs)))
+   (Posterior (Params p mu1 mu2) (list=? real=? data obs))))

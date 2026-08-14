@@ -1,0 +1,2 @@
+; Pinning a draw under a constant rate: the posterior draw is a Dirac at 0.5.
+(query (let ((x (exponential 2.0))) (Posterior x (real_eq x 0.5))))

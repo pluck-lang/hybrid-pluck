@@ -1,0 +1,9 @@
+(define (dirichlet-categorical)
+    (let ((p (dirichlet 1.0 1.0 1.0))
+          (first (categorical p))
+          (second (categorical p)))
+    (Posterior second (native_eq first @1))))
+
+(query second-given-that-first-is-one (dirichlet-categorical))
+
+

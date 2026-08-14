@@ -1,0 +1,21 @@
+; Generate a random sorted list and query properties
+(define (mkSortedList n)
+  (if (flip 0.5)
+    (Nil)
+    (let (x (+ n (geom 0.5)))
+      (Cons x (mkSortedList x)))))
+
+(query
+ first-two-elements-are-zero
+ (Marginal
+  (list=? nat=?
+          (take 2 (mkSortedList 0))
+          (Cons 0 (Cons 0 (Nil))))))
+
+(query
+ second-element-given-first-and-third
+ (let ((xs (mkSortedList 0)))
+   (Posterior
+    (index 1 xs)
+    (and (nat=? (index 0 xs) 2)
+         (nat=? (index 2 xs) 5)))))

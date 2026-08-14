@@ -1,0 +1,13 @@
+;; A correlated 2D Gaussian prior with rho=0.5. Observe x[0] = 1.0 and
+;; query the marginal posterior of x[1].
+;;
+;; Analytic answer: given prior N({0, 0}, {{1, 0.5}, {0.5, 1}}) and x[0] = 1.0,
+;; the posterior on x[1] is N(0.5, 0.75).
+
+(query
+ joint
+ (let ((x (gaussian {0.0, 0.0}
+                    {{1.0, 0.5},
+                     {0.5, 1.0}})))
+   (Posterior (vector_index x @1)
+              (real_eq (vector_index x @0) 1.0))))

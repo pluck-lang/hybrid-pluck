@@ -1,0 +1,7 @@
+; Elementwise float-matrix arithmetic with scalar broadcasting. Pure floats,
+; no Gaussian variables — exercises the cell_op short-circuits and broadcast
+; paths against a known result.
+(query
+  (let ((a {{1.0, 2.0}, {3.0, 4.0}})
+        (b {{5.0, 6.0}, {7.0, 8.0}}))
+    (Posterior (+. (*. 2.0 a) b) True)))

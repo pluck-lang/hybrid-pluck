@@ -1,0 +1,19 @@
+[
+  {
+    "query": "(let((a { { 1.0 , 2.0 } , { 3.0 , 4.0 } }) (b { { 5.0 , 6.0 } , { 7.0 , 8.0 } })) (Posterior(@ a b) True))",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "{{19, 22}, {43, 50}}",
+          "log_probability": 0.0,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

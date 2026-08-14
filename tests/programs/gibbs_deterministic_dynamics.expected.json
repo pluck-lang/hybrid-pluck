@@ -1,0 +1,20 @@
+[
+  {
+    "query": "gibbs-deterministic",
+    "kind": {
+      "result_kind": "samples",
+      "values": [
+        "True",
+        "True",
+        "True",
+        "True",
+        "True",
+        "True",
+        "True",
+        "True",
+        "True",
+        "True"
+      ]
+    }
+  }
+]

@@ -1,0 +1,49 @@
+;; Factorial HMM (exact inference)
+;;
+;; Each observation is driven by TWO independent hidden chains z_n and h_n,
+;; and the emission mean is indexed by their product:
+;;   mu_k ~ N(0,1)                       for k in 1..K^2   (K^2 shared means)
+;;   z_1 ~ categorical(theta_1),  h_1 ~ categorical(theta_1)
+;;   z_n ~ categorical(theta_{z_{n-1}}), h_n ~ categorical(theta_{h_{n-1}})
+;;   y_n ~ N(mu_{z_n * h_n}, 1)
+;;
+;; With K = 3 the states are 1..3; their product ranges over {1,2,3,4,6,9}.
+;; We keep 9 means (mu_1..mu_9); pairs with the same product share a mean,
+;; and mu_5/mu_7/mu_8 are never selected (stay at their N(0,1) prior).
+
+(define (transition prev)
+  (if (native_eq prev @0) (categorical 0.6 0.3 0.1)
+    (if (native_eq prev @1) (categorical 0.2 0.6 0.2)
+      (categorical 0.1 0.3 0.6))))
+
+(define (initial-state) (categorical 0.5 0.3 0.2))
+
+;; mu_{z*h}: 0-indexed states z,h in {0,1,2} represent 1,2,3; we pick the
+;; mean at index (product - 1). Equal products map to the same index.
+(define (pick-mu z h mus)
+  (if (native_eq z @0)
+      (if (native_eq h @0) (index 0 mus)
+        (if (native_eq h @1) (index 1 mus) (index 2 mus)))
+    (if (native_eq z @1)
+        (if (native_eq h @0) (index 1 mus)
+          (if (native_eq h @1) (index 3 mus) (index 5 mus)))
+      (if (native_eq h @0) (index 2 mus)
+        (if (native_eq h @1) (index 5 mus) (index 8 mus))))))
+
+;; Advance both chains, conditioning each emission against the matching
+;; observation as it is created. Interleaved conditioning keeps the BDD
+;; variable order linear (see examples/hmm_first_order.pluck).
+(define (chain-obs z h mus os)
+  (match os
+    Nil => (True)
+    Cons o os => (and (real=? (normal (pick-mu z h mus) 1.0) o)
+                      (chain-obs (transition z) (transition h) mus os))))
+
+
+(define obs [-1.78, -1.98, -0.99, -1.76, 0.64])
+
+(query hmm-factorial
+  (let ((mus [(normal -3.0 1.0), (normal -1.5 1.0), (normal -0.5 1.0),
+              (normal 1.0 1.0), (normal 0.0 1.0), (normal 2.0 1.0),
+              (normal 0.0 1.0), (normal 0.0 1.0), (normal 3.5 1.0)]))
+    (Posterior (index 0 mus) (chain-obs (initial-state) (initial-state) mus obs))))

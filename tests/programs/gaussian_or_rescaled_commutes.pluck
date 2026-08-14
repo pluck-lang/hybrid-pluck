@@ -1,0 +1,20 @@
+; Order-independence of the weighted count of a disjunction of two
+; rescalings of the same test. Pointwise, (z = 5 OR 2z = 10) is the
+; wider slab, so both branches of the `if` carry the same evidence
+; weight and P(c) = 1/2 — for BOTH operand orders of the `or`.
+;
+; The second query is the regression: with the coin for 2z = 10 first,
+; the accepting BDD path {¬(2z=10), z=5} multiplies the z = 5 slab by
+; the co-weight of 2z = 10 — the punctured slab. An implementation that
+; collapses that product to zero undercounts the disjunction by half
+; and answers P(c) = 1/3 here, so the `or` fails to commute.
+(query
+  (let (z (gaussian 0.0 1.0))
+    (let (c (flip 0.5))
+      (Posterior c (if c (or (real_eq z 5.0) (real_eq (*. 2.0 z) 10.0))
+                         (real_eq z 5.0))))))
+(query
+  (let (z (gaussian 0.0 1.0))
+    (let (c (flip 0.5))
+      (Posterior c (if c (or (real_eq (*. 2.0 z) 10.0) (real_eq z 5.0))
+                         (real_eq z 5.0))))))

@@ -1,0 +1,9 @@
+; Observe a Dirichlet at one value and query at a different value — must be
+; False with probability 1. Mirrors `beta_observation_different.pluck` for
+; `prob_eq`. Exercises the merge of `RealEq(v1)` × `RealEq(v2)` (where v1 != v2)
+; on the same underlying Dirichlet variable, which should resolve to a
+; measure-zero contradiction.
+(query
+  (let (p (dirichlet 1.0 1.0 1.0))
+    (Posterior (dirichlet_eq p {0.2, 0.3, 0.5})
+      (dirichlet_eq p {0.5, 0.3, 0.2}))))

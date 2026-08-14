@@ -1,0 +1,39 @@
+;; String Typos
+;; 
+;; Probabilistic string perturbation model.
+;; A random edit model: characters can be substituted,
+;; deleted, or inserted with small probability.
+
+(define (random_char)
+  (uniform_int_range @8 @32 @126))
+
+(define (char=? a b) (int_dist_eq a b))
+(define string=? (list=? char=?))
+
+(define (random_string p)
+  (if (flip p) (Nil) (Cons (random_char) (random_string p))))
+(define (perturb s)
+  (match s
+     Nil => (random_string 0.99)
+     Cons c cs =>
+       (let
+         (do_delete (flip 0.01)
+          insertion (random_string 0.99)
+          perturbed_cs (perturb cs))
+        (if do_delete
+          perturbed_cs
+          (append insertion (Cons (if (flip 0.01) (random_char) c) perturbed_cs))))))
+
+; What is the probability that "lazy"
+; is mistyped as "lucky"?
+(query
+ lazy-to-lucky
+ (Marginal (string=? (perturb "lazy") "lucky")))
+
+; Is "gat" more likely a typo of "goat" or "bat"?
+(query
+ goat-or-bat
+ (let ((original (if (flip 0.5) "goat" "bat")))
+   (Posterior
+    original
+    (string=? (perturb original) "gat"))))

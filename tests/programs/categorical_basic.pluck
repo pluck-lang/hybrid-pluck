@@ -1,0 +1,4 @@
+(define (cat-marginal)
+    (Marginal (categorical 0.3 0.5 0.2)))
+
+(query cat-marginal (cat-marginal))

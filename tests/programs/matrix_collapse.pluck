@@ -1,0 +1,39 @@
+;; =====================================================================
+;; REGRESSION: identical inline draws inside a {..} vector literal must
+;;             stay INDEPENDENT random variables (not collapse to one).
+;; =====================================================================
+;; In each query we build a 2-vector whose components are TWO independent
+;; standard normals, observe component 0 = 5.0, and ask for component 1.
+;; Component 1 was never observed, so it must stay at its prior N(0, 1) in
+;; every query.  (We read/observe components via `dot` with a constant
+;; selector vector, which forces the entries -- `real_eq (vector_index
+;; <literal>)` panics.)
+;;
+;; Before the strict_order_index fix in compile_float_matrix, the first
+;; query collapsed the two inline draws into a single RV, so observing
+;; component 0 = 5.0 dragged component 1 to N(5, 0).
+
+;; ---- two identical inline (normal 0 1) in a literal -----------------
+;; EXPECTED: y ~ N(0.0000, 1.0000)
+(query inline-literal
+ (let ((v {(normal 0.0 1.0), (normal 0.0 1.0)}))
+   (Posterior (dot v {0.0, 1.0})
+              (real_eq (dot v {1.0, 0.0}) 5.0))))
+
+;; ---- control A: let-bind the two draws to distinct names first ------
+;; Binding each draw separately gives them distinct identities, so the
+;; literal {a, b} keeps two RVs.  y ~ N(0.0000, 1.0000) as expected.
+(query letbound-then-literal
+ (let ((a (normal 0.0 1.0))
+       (b (normal 0.0 1.0))
+       (v {a, b}))
+   (Posterior (dot v {0.0, 1.0})
+              (real_eq (dot v {1.0, 0.0}) 5.0))))
+
+;; ---- control B: build the vector with `gaussian` (correct) ----------
+;; A multivariate gaussian gives genuinely independent components.
+;; y ~ N(0.0000, 1.0000) as expected.
+(query gaussian-vector
+ (let ((v (gaussian {0.0, 0.0} {{1.0, 0.0}, {0.0, 1.0}})))
+   (Posterior (dot v {0.0, 1.0})
+              (real_eq (dot v {1.0, 0.0}) 5.0))))

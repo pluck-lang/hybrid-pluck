@@ -1,0 +1,2 @@
+; P(x >= 0.5 | l) = e^{-0.5 l}: posterior Gamma(2, 1.5).
+(query (let ((r (gamma 2.0 1.0))) (Posterior r (real_geq (exponential r) 0.5))))

@@ -1,0 +1,12 @@
+; Regression test: compile_gaussian must compile `mu` and `sigma` under
+; *distinct* strict_order_index values. The two flips below are distinct
+; random choices with identical parameters at identical relative callstack
+; positions; if both children are compiled at the same index, the flips
+; collapse into a single BDD variable and the posterior mixture has only
+; the (mu=0, sigma=1) and (mu=3, sigma=2) components at p=0.5 each,
+; instead of all four (mu, sigma) combinations at p=0.25 each.
+(query
+  (Posterior
+    (gaussian (if (flip 0.5) 0.0 3.0)
+              (if (flip 0.5) 1.0 2.0))
+    True))

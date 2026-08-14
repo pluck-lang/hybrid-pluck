@@ -1,0 +1,2 @@
+; Gamma-Poisson conjugacy: Gamma(2,1) + observation k = 3 => Gamma(5, 2).
+(query (let ((r (gamma 2.0 1.0))) (Posterior r (native_eq (poisson r) @3))))

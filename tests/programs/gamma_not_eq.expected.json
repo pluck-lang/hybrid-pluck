@@ -1,0 +1,32 @@
+[
+  {
+    "query": "(let((x(gamma 2.0 1.0))) (Posterior x(not(real_eq x 3.0))))",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "λ",
+          "log_probability": 0.0,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gamma": [
+              {
+                "gamma": {
+                  "Gamma": {
+                    "name": "λ",
+                    "shape": 2.0,
+                    "rate": 1.0
+                  }
+                },
+                "poisson": {},
+                "exponential": {}
+              }
+            ],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

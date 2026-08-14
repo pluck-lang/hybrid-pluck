@@ -1,0 +1,19 @@
+;; title: Linear Transform of a Gaussian Vector
+;; order: 231
+;;
+;; Take a 2D isotropic Gaussian and push it through a constant 2x2 matrix.
+;; The posterior is the transformed Gaussian; matmul folds the per-component
+;; affine combinations together with the existing 0/1 short-circuit so the
+;; off-diagonal-zero entries of A never force evaluation of unused dimensions.
+
+(query
+ transformed
+ (let ((x (gaussian {0.0, 0.0, 1.0}
+                    {{4.0, 0.0, -1.0},
+                     {0.0, 4.0, -2.0},
+                     {-1.0, -2.0, 4.0}}))
+       (A {{2.0,  1.0, 0.0},
+           {1.0, -1.0, 1.0},
+           {1.0, -1.0, 1.0}})
+       (i (categorical 0.5 0.3 0.2)))
+   (Posterior (@ A x) (real_eq (vector_index x i) 0.0))))

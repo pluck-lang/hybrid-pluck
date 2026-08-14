@@ -1,0 +1,4 @@
+; Pinning the rate by disintegration: the posterior is a Dirac at the
+; observed value (evidence weight = the Gamma(2,1) density at 3,
+; normalized away in the single-component result).
+(query (let ((x (gamma 2.0 1.0))) (Posterior x (real_eq x 3.0))))

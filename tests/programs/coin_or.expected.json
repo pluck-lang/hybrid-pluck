@@ -1,0 +1,28 @@
+[
+  {
+    "query": "coin-or",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "True",
+          "log_probability": -0.43078291609245417,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": []
+          }
+        },
+        {
+          "display": "False",
+          "log_probability": -1.0498221244986778,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

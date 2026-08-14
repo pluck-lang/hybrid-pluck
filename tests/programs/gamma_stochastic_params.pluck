@@ -1,0 +1,2 @@
+; Gamma under discrete branching: two 50% components with distinct priors.
+(query (Posterior (if (flip 0.5) (gamma 1.0 1.0) (gamma 2.0 2.0)) True))

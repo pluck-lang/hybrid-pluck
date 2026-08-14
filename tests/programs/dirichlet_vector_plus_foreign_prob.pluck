@@ -1,0 +1,7 @@
+(define (vec-plus-foreign-prob)
+    (let ((p (dirichlet 1.0 1.0 1.0))
+          (q (dirichlet 1.0 1.0))
+          (q0 (vector_index q @0)))
+    (Posterior (Pair p q0) (flip q0))))
+
+(query dirichlet-vector-plus-foreign-prob (vec-plus-foreign-prob))

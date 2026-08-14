@@ -1,0 +1,67 @@
+;; Mixture model where the number of components N is itself random:
+;;   - N ~ UniformIntRange(1..3): a 2-bit bit-encoded int
+;;   - means: Cons-list of N independent N(0, 1) draws, built by the
+;;     recursive function `sample-means` (base case at n=0)
+;;   - weights ~ Dirichlet(1, …, 1) of length N
+;;   - each observation: c ~ Categorical(weights); y ~ N(mean[c], 1)
+;;
+;; `sample-means` uses int_sub to decrement n on each recursive call.
+;; `sample-weights` is a bounded if-cascade because Dirichlet arity must
+;; be known at parse time. `pick-mean` walks the Cons-list; its index
+;; argument is a native int from `categorical`.
+;; Extend ZERO/ONE/TWO/THREE and the cascades to raise N_MAX.
+
+(define obs [0.3, 1.2, 2.9, 1.3, 1.0, 4., 0.4, 0.5, 0.6, 1.0, 1.1])
+
+(define ZERO  (mk_int @2 @0))
+(define ONE   (mk_int @2 @1))
+(define TWO   (mk_int @2 @2))
+(define THREE (mk_int @2 @3))
+
+(define (sample-means n)
+  (if (int_eq n ZERO)
+    (Nil)
+    (Cons (normal 0.0 1.0) (sample-means (int_sub n ONE)))))
+
+(define (sample-weights n)
+  (if (int_eq n ONE) (dirichlet 1.0)
+    (if (int_eq n TWO) (dirichlet 1.0 1.0)
+      (dirichlet 1.0 1.0 1.0))))
+
+(define (pick-mean c means)
+  (match means
+    Cons m rest =>
+      (if (native_eq c @0)
+        m
+        (match rest
+          Cons m2 rest2 =>
+            (if (native_eq c @1)
+              m2
+              (match rest2
+                Cons m3 _ => m3))))))
+
+(define (pick-cluster-and-mean weights means)
+  (let
+    (
+      (c (categorical weights))
+      (val (normal (pick-mean c means) 1.0)))
+
+    (Pair c val)))
+
+(query
+ mixture-gibbs
+ (let
+  ((n       (uniform_int_range @2 @1 @3))
+   (means   (sample-means n))
+   (weights (sample-weights n))
+   (cs-and-data  (map (fn i -> (pick-cluster-and-mean weights means))
+                 (range (length obs))))
+   (cs (map (fn p -> (fst p)) cs-and-data))
+   (data (map (fn p -> (snd p)) cs-and-data)))
+
+  (Gibbs
+    n                              ; query — return cluster count per step
+    (list=? real=? data obs)       ; condition on observed values
+    1000                           ; num MCMC steps (each emits one query sample)
+    (block-gibbs cs)               ; Do block gibbs on cluster assignments
+    (WithPriorSample cs))))        ; seed the chain with random cluster assignments

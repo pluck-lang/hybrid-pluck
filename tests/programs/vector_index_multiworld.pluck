@@ -1,0 +1,8 @@
+; Multi-world index expression: the `if (flip 0.5) @0 @2` selects index 0 or 2
+; per world. Each world threads through the recursive bind_compile in
+; compile_index, and join_monad merges the results into a mixture over the
+; corresponding matrix entries (10.0 vs 30.0).
+(query
+  (let ((m {10.0, 20.0, 30.0})
+        (i (if (flip 0.5) @0 @2)))
+    (Posterior (vector_index m i) True)))

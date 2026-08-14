@@ -1,0 +1,46 @@
+[
+  {
+    "query": "dirichlet-vector-and-index",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "(p, p₁)",
+          "log_probability": -0.6931471805599453,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [
+              {
+                "name": "p",
+                "alphas": [
+                  1.0,
+                  1.0,
+                  2.0
+                ]
+              }
+            ],
+            "gaussian": []
+          }
+        },
+        {
+          "display": "(p, p₁)",
+          "log_probability": -0.6931471805599453,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [
+              {
+                "name": "p",
+                "alphas": [
+                  2.0,
+                  1.0,
+                  1.0
+                ]
+              }
+            ],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

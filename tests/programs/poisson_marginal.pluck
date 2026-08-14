@@ -1,0 +1,3 @@
+; A queried draw the evidence never observed still appears in the packet
+; as its conditional law given the (pinned) rate.
+(query (Marginal (poisson 5.0)))

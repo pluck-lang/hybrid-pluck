@@ -1,0 +1,9 @@
+; Testing dirichlet_eq which observes that a Dirichlet draw equals a specific
+; probability vector. The posterior on `p` should be a Pinned prior at that
+; vector (mirrors `beta_observation.pluck` for `prob_eq`).
+; The value uses matrix-literal syntax (curly braces, comma-separated) so it
+; parses as a 1-D FloatMatrix rather than a Cons-list.
+(query
+  (let (p (dirichlet 1.0 1.0 1.0))
+    (Posterior (dirichlet_eq p {0.2, 0.3, 0.5})
+      (dirichlet_eq p {0.2, 0.3, 0.5}))))

@@ -1,0 +1,21 @@
+;; Random Strings
+;;
+;; Two random strings concatenated with a space.
+;; Given the observed result, what were the
+;; original strings?
+
+(define (random_char) (uniform_int_range @8 @32 @126))
+
+(define (random-printable-string p)
+  (if (flip p) "" (Cons (random_char) (random-printable-string p))))
+
+(query
+ uncertain-world
+ (let
+  ((p (beta 1.0 1.0))
+   (s1 (random-printable-string p))
+   (s2 (random-printable-string p))
+   (s (append s1 (append " " s2))))
+   (Posterior
+    (Pair s1 s2)
+    (string=? s "hi uncertain world"))))

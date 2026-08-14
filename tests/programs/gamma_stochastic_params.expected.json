@@ -1,0 +1,54 @@
+[
+  {
+    "query": "(Posterior(if(flip 0.5) (gamma 1.0 1.0) (gamma 2.0 2.0)) True)",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "λ",
+          "log_probability": -0.6931471805599453,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gamma": [
+              {
+                "gamma": {
+                  "Gamma": {
+                    "name": "λ",
+                    "shape": 1.0,
+                    "rate": 1.0
+                  }
+                },
+                "poisson": {},
+                "exponential": {}
+              }
+            ],
+            "gaussian": []
+          }
+        },
+        {
+          "display": "λ",
+          "log_probability": -0.6931471805599453,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gamma": [
+              {
+                "gamma": {
+                  "Gamma": {
+                    "name": "λ",
+                    "shape": 2.0,
+                    "rate": 2.0
+                  }
+                },
+                "poisson": {},
+                "exponential": {}
+              }
+            ],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,8 @@
+; Tests that posterior queries work correctly when we return an affine expression
+(query
+  (let ((x (gaussian 0.0 1.0))
+       (y (gaussian 0.0 1.0))
+       (z (gaussian 0.0 1.0)))
+      (Posterior
+        (+. x y)
+        (real_eq (+. (+. x y) z) 1.0))))

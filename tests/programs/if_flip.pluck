@@ -1,0 +1,2 @@
+;; if then else based on flip
+(query if-flip (Marginal (if (flip 0.5) (flip 0.8) (flip 0.2))))

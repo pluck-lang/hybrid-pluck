@@ -1,0 +1,28 @@
+[
+  {
+    "query": "(let((m { 10.0 , 20.0 , 30.0 }) (i(if(flip 0.5) @0 @2))) (Posterior(vector_index m i) True))",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "10",
+          "log_probability": -0.6931471805599453,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": []
+          }
+        },
+        {
+          "display": "30",
+          "log_probability": -0.6931471805599453,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

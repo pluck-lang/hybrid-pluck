@@ -1,0 +1,16 @@
+;; Port of Alea.jl/benchmarks/coinBias.jl
+;;
+;; Beta-Bernoulli: a coin bias a ~ Beta(2,5); five flips of the coin are
+;; observed with outcomes y = [1,1,0,1,0]. Return the posterior over a.
+;; (Dice's `expectation` reports E[a]; pluck returns the full posterior,
+;; which here is the conjugate Beta(2+3, 5+2) = Beta(5,7).)
+
+(define (obs-flip p y) (iff (flip p) y))
+(define (obs-all p ys)
+  (match ys
+    Nil => (True)
+    Cons y rest => (and (obs-flip p y) (obs-all p rest))))
+
+(query coinBias
+  (let ((a (beta 2.0 5.0)))
+    (Posterior a (obs-all a [true, true, false, true, false]))))

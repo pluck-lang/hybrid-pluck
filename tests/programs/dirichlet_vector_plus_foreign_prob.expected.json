@@ -1,0 +1,35 @@
+[
+  {
+    "query": "dirichlet-vector-plus-foreign-prob",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "(p, q₀)",
+          "log_probability": 0.0,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [
+              {
+                "name": "p",
+                "alphas": [
+                  1.0,
+                  1.0,
+                  1.0
+                ]
+              },
+              {
+                "name": "q",
+                "alphas": [
+                  2.0,
+                  1.0
+                ]
+              }
+            ],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

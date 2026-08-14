@@ -1,0 +1,35 @@
+[
+  {
+    "query": "single-obs-pair-return",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "(p, q)",
+          "log_probability": 0.0,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [
+              {
+                "name": "p",
+                "alphas": [
+                  2.0,
+                  1.0,
+                  1.0
+                ]
+              },
+              {
+                "name": "q",
+                "alphas": [
+                  1.0,
+                  1.0
+                ]
+              }
+            ],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

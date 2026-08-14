@@ -1,0 +1,43 @@
+;; K = 3 discrete states, Gaussian emissions.
+;;   mu_k ~ N(0,1)                       (K shared continuous params)
+;;   z_1  ~ categorical(theta_1)
+;;   z_n  ~ categorical(theta_{z_{n-1}})
+;;   y_n  ~ N(mu_{z_n}, 1)
+;;
+;; theta is a fixed 3x3 transition matrix (each row is the distribution of
+;; the next state given the previous state). categorical returns a native
+;; int in {0,1,2}, so we branch on it with native_eq.
+
+;; theta_{prev}: distribution of the next state.
+(define (transition prev)
+  (if (native_eq prev @0) (categorical 0.6 0.3 0.1)
+    (if (native_eq prev @1) (categorical 0.2 0.6 0.2)
+      (categorical 0.1 0.3 0.6))))
+
+;; theta_1: distribution of the first state.
+(define (initial-state) (categorical 0.5 0.3 0.2))
+
+;; mu_{z}: select the shared mean for state z.
+(define (pick-mu z m1 m2 m3)
+  (if (native_eq z @0) m1
+    (if (native_eq z @1) m2 m3)))
+
+;; Generate the chain, conditioning each emission against the matching
+;; observation as it is created. Interleaving generation and conditioning keeps
+;; the BDD variable order linear: each step's observation variable sorts next
+;; to that step's transition flips (pluck orders BDD variables by creation
+;; callstack). Generating the whole chain and comparing at the end
+;; ((list=? real=? (take n ys) obs)) instead puts every observation variable
+;; after every transition flip, forcing the BDD to remember the full state
+;; path -- exactly (5/2)(3^n - 1) nodes vs 9n - 4 for this interleaved form.
+(define (chain-obs z m1 m2 m3 os)
+  (match os
+    Nil => (True)
+    Cons o os => (and (real=? (normal (pick-mu z m1 m2 m3) 1.0) o)
+                      (chain-obs (transition z) m1 m2 m3 os))))
+
+(define obs [0.26, -1.18, 0.83, -2.02, -2.06, -1.11, -2.39, -1.23, -1.39])
+
+(query hmm-first-order
+  (let ((m1 (normal -2.0 1.0)) (m2 (normal 0.0 1.0)) (m3 (normal 2.0 1.0)))
+    (Posterior m1 (chain-obs (initial-state) m1 m2 m3 obs))))

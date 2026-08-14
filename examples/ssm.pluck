@@ -1,0 +1,86 @@
+;; State-Space Model
+(define-type point (Pt x y))
+
+(define obs
+  [(Pt 1.0 1.0),
+   (Pt 1.2 1.4),
+   (Pt 1.6 2.0),
+   (Pt 3.0 5.0),
+   (Pt 3.5 5.5),
+   (Pt 3.7 5.2),
+   (Pt 3.0 4.5)])
+
+(define-type state (State vel loc))
+
+(define (point-+ p q)
+  (match p
+    Pt x1 y1 =>
+    (match q
+      Pt x2 y2 => (Pt (+. x1 x2) (+. y1 y2)))))
+
+(define (add-noise pt sigma)
+  (point-+ pt (Pt (normal 0.0 sigma)
+                  (normal 0.0 sigma))))
+
+(define (transition state)
+  (match state
+    State vel loc =>
+    (let ((new-loc (point-+ loc vel))
+          (new-vel (add-noise vel 0.1)))
+      (State new-vel new-loc))))
+
+(define (observe state)
+  (match state
+    State vel loc => (add-noise loc 0.1)))
+
+(define (trajectory state)
+  (let ((next-state (transition state)))
+    (Cons (Pair state (observe state))
+          (trajectory next-state))))
+
+(define (point=? pt1 pt2)
+  (match pt1
+    Pt x1 y1 =>
+    (match pt2
+      Pt x2 y2 =>
+      (and (real=? x1 x2) (real=? y1 y2)))))
+
+(define (compose f g) (fn x -> (f (g x))))
+(define (vel state) (match state State vel loc => vel))
+(define (loc state) (match state State vel loc => loc))
+(define (x pt) (match pt Pt x y => x))
+(define (y pt) (match pt Pt x y => y))
+
+(define (initial-state)
+  (State
+   (Pt (normal 0.0 1.0) (normal 0.0 1.0))
+   (Pt (normal 0.0 10.0) (normal 0.0 10.0))))
+
+(query
+ ssm
+ (let ((chain (trajectory (initial-state))))
+   (Posterior
+    (take 7 (map (compose (compose x vel) fst) chain))
+    (and
+     (point=? (car (map snd chain)) (car obs))
+
+     (point=? (index 6 (map snd chain)) (index 6 obs))))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

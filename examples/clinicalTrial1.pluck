@@ -1,0 +1,28 @@
+;; Port of Alea.jl/benchmarks/clinicalTrial1.jl
+;;
+;; isEffective ~ Bernoulli(0.5). If effective, the control and treated groups
+;; have independent success probabilities (probControl, probTreated); if not,
+;; they share a single probability (probAll). All priors are Uniform[0,1]
+;; (= Beta(1,1)). We observe the first 100 control/treated outcomes and
+;; return the posterior over isEffective.
+
+(define (obs-flip p y) (iff (flip p) y))
+(define (obs-all p ys)
+  (match ys
+    Nil => (True)
+    Cons y rest => (and (obs-flip p y) (obs-all p rest))))
+
+(define control [false, false, true, true, true, false, true, true, false, false, false, false, false, false, true, false, true, false, false, true, true, true, true, true, true, false, false, true, true, true, false, false, true, true, true, false, false, true, true, false, false, true, false, false, true, false, false, true, true, true, false, false, true, false, true, false, true, true, false, true, false, false, true, true, true, false, false, false, true, false, true, true, false, false, true, true, true, false, false, false, true, true, false, false, false, true, true, false, false, false, true, false, true, true, false, false, false, true, false, true])
+(define treated [false, true, false, false, true, true, true, true, true, true, false, false, true, true, false, true, false, false, true, false, true, false, true, false, false, false, false, true, true, false, false, false, true, true, true, false, true, true, true, true, true, true, true, true, false, true, false, true, false, false, true, false, true, true, true, true, true, true, false, false, true, false, true, false, false, false, true, false, true, false, true, false, false, true, true, false, true, false, false, false, true, false, false, true, true, true, true, false, false, true, true, false, true, true, false, false, true, false, false, false])
+
+(query clinicalTrial1
+  (let ((isEffective (flip 0.5))
+        (probControl (beta 1.0 1.0))
+        (probTreated (beta 1.0 1.0))
+        (probAll (beta 1.0 1.0)))
+    (Posterior isEffective
+      (if isEffective
+        (and (obs-all probControl control)
+             (obs-all probTreated treated))
+        (and (obs-all probAll control)
+             (obs-all probAll treated))))))

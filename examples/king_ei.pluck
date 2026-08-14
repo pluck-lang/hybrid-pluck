@@ -1,0 +1,87 @@
+;; King (1999) beta-binomial ecological inference.
+;;
+;; Ecological inference (EI) is the problem of recovering individual-level
+;; behaviour from aggregate (precinct-level) margins ONLY. For a 2x2 table per
+;; precinct i we know how many voters are White (Nw_i) and non-White (Nb_i) and
+;; the TOTAL votes T_i a candidate received -- but NOT how those T_i votes split
+;; across the two race groups. King, Rosen & Tanner's (1999) binomial-beta model
+;; treats that split as a latent and puts a Beta prior on the per-group support
+;; rates:
+;;
+;;   bw ~ Beta(a,b)              ;; P(a White voter backs the candidate)
+;;   bb ~ Beta(a,b)              ;; P(a non-White voter backs the candidate)
+;;   kw_i, kb_i                  ;; White / non-White backers in precinct i (LATENT, see count-flips)
+;;   T_i  = kw_i + kb_i          ;; OBSERVED margin
+;;
+;; The accounting identity T_i = kw_i + kb_i is the only link to the data; the
+;; individual cell counts kw_i, kb_i are never observed. pluck does the exact
+;; thing the EI literature does numerically: it marginalises the unknown cells
+;; out and reports the posterior over the district-wide rates bw, bb.
+;;
+;; A Binomial(N, p) count is built as the number of `true`s among N flips of a
+;; shared `p`: pluck collapses those 2^N latent assignments by sufficient
+;; statistic into the exact beta-binomial count, and -- because bw, bb are shared
+;; across precincts -- the whole posterior collapses by the TOTAL successes
+;; (sum kw), staying linear in the total number of trials.
+
+;; a precinct: White trials, non-White trials, observed candidate
+;; votes
+(define-type precinct (Precinct any any any))
+
+;; count the `true`s among `n` flips of a shared probability `p` ~ Binomial(n,p).
+;; n is a Peano nat; the returned count is a Peano nat.
+(define (count-flips p n)
+  (match n
+    O => 0
+    S m => (let ((rest (count-flips p m)))
+             (if (flip p) (S rest) rest))))
+
+;; observe one precinct: require the White backers (kw ~ Binomial(wc, bw)) plus
+;; non-White backers (kb ~ Binomial(bc, bb)) to equal the observed votes tc.
+(define (observe-precinct bw bb pr)
+  (match pr
+    Precinct wc bc tc =>
+      (== (+ (count-flips bw wc) (count-flips bb bc)) tc)))
+
+;; conjoin the margin constraint across every precinct (rates bw, bb shared).
+(define (observe-precincts bw bb prs)
+  (match prs
+    Nil => (True)
+    Cons pr rest => (and (observe-precinct bw bb pr)
+                         (observe-precincts bw bb rest))))
+
+(define precincts
+  [(Precinct 27 4 12)   ;; 71-1  
+   (Precinct 15 4 8)    ;; 71-2  
+   (Precinct 27 5 13)   ;; 71-3  
+   (Precinct 3 4 5)     ;; 72-1  
+   (Precinct 2 7 8)     ;; 72-2  
+   (Precinct 0 1 1)     ;; 72-3  
+   (Precinct 9 6 8)     ;; 72-4  
+   (Precinct 4 3 5)     ;; 72-5  
+   (Precinct 26 6 14)   ;; 73-1  
+   (Precinct 6 1 3)     ;; 73-2  
+   (Precinct 8 7 9)     ;; 73-3  
+   (Precinct 12 6 10)   ;; 73-4 
+   (Precinct 9 1 4)     ;; 73-5  
+   (Precinct 2 1 2)     ;; 73-6  
+   (Precinct 20 7 13)   ;; 74-1  
+   (Precinct 17 6 12)   ;; 74-2  
+   (Precinct 2 1 1)     ;; 74-3  
+   (Precinct 20 7 14)   ;; 74-4  
+   (Precinct 2 3 4)     ;; 75-1  
+   (Precinct 6 3 5)     ;; 75-2  
+   (Precinct 2 3 4)     ;; 75-3  
+   (Precinct 1 1 1)     ;; 75-4  
+   (Precinct 2 1 2)     ;; 75-5  
+  ])
+
+;; Beta(1,1) = Uniform[0,1] prior on each district-wide support rate.
+;; Posterior over ONLY the White Malloy rate bw. 
+;; The non-White rate bb is still a model latent, marginalised out
+;; of the reported posterior.
+(query king-ei
+  (let ((bw (beta 1.0 1.0))
+        (bb (beta 1.0 1.0)))
+    (Posterior bw
+               (observe-precincts bw bb precincts))))

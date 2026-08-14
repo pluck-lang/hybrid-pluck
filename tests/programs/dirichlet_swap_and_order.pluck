@@ -1,0 +1,8 @@
+(define (swap-and-order)
+    (let ((p (dirichlet 1.0 1.0 1.0))
+          (q (dirichlet 1.0 1.0))
+          (p0 (vector_index p @0))
+          (q0 (vector_index q @0)))
+    (Posterior (Pair p q) (and (flip q0) (flip p0)))))
+
+(query swap-and-order (swap-and-order))

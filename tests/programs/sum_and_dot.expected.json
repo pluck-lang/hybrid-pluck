@@ -1,0 +1,39 @@
+[
+  {
+    "query": "(let((x(gaussian { 0.0 , 0.0 } { { 1.0 , 0.0 } , { 0.0 , 1.0 } })) (a { 1.0 , 2.0 })) (Posterior(dot a x) (real_eq(sum x) 1.0)))",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "x",
+          "log_probability": 0.0,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": [
+              {
+                "var_order": [
+                  "x"
+                ],
+                "mean": [
+                  [
+                    1.5
+                  ],
+                  1,
+                  null
+                ],
+                "cov": [
+                  [
+                    0.5
+                  ],
+                  1,
+                  1
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+]

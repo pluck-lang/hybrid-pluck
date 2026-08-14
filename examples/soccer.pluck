@@ -1,0 +1,91 @@
+;; Self-contained soccer tournament model, data, and query.
+;;
+;; Latent team "identities" {attack(+1), balanced(0), defend(-1)} from a shared
+;; Dirichlet-categorical, and gamma-Poisson goals with a per-team SHARED, SCALED
+;; rate. A match adds the two identities (p = id1 + id2 in {0..4}); the matchup
+;; scale is 1.5^(p-2); the HOME team (listed first) gets a +1 boost (scale index
+;; p+1). Every game scales the SAME team rate, so a team's results pool into one
+;; gamma-Poisson rate. The game type and all model/observation helpers live here,
+;; along with the roster (team-names), the match scores, and the query itself.
+
+;; team-i  team-j  goals-i  goals-j
+(define-type game (Game any any any any))
+
+;; --- identity ---------------------------------------------------------------
+(define (draw-identity theta)
+  ;; categorical returns a Native(Int) in {@0,@1,@2}; map it to a Peano nat.
+  (let ((c (categorical theta)))
+    (if (native_eq c @0) 0 (if (native_eq c @1) 1 2))))
+
+(define (identity-label id)
+  (if (== id 0) "defend" (if (== id 1) "balanced" "attack")))
+
+;; --- rates ------------------------------------------------------------------
+;; One intrinsic rate per team, shared across all its games; a match scales it.
+;; shape k = 4 concentrates the prior around its mean (CV = 1/sqrt(k) = 0.5; the
+;; old shape-1 Exponential had CV = 1 with all its mass piled near 0).
+(define rate-shape 4.0)
+;; the neutral-matchup prior MEAN (identity-sum s = 0). Gamma(k, k/mean) has mean
+;; exactly `mean`; scaling that draw by `c` later yields a Gamma of mean c·mean.
+(define base-mean 1.0)
+(define (make-rate) (gamma rate-shape (/. rate-shape base-mean)))
+;; matchup scale at position p = 0..5 -> identity-sum s = p-2 -> factor 1.5^s.
+;; Multiplying the shared rate by this gives a scaled draw of mean 1.5^s — the
+;; same per-matchup prior the old per-index rates carried. (Position 5, 3.375,
+;; is reachable only by a home team's boosted index p+1.)
+(define rate-scales
+  [(/. 4.0 9.0)   ;; s=-2  1.5^-2 ~ 0.444
+   (/. 2.0 3.0)   ;; s=-1  1.5^-1 ~ 0.667
+   1.0            ;; s= 0  1.5^0
+   1.5            ;; s= 1  1.5^1
+   2.25           ;; s= 2  1.5^2
+   3.375])        ;; s= 3  1.5^3  (home-boosted top)
+
+;; --- teams ------------------------------------------------------------------
+;; a team bundles its identity (Peano nat) with its single intrinsic rate.
+(define (make-team theta) (Pair (draw-identity theta) (make-rate)))
+(define (team-id t)   (fst t))
+(define (team-rate t) (snd t))
+
+;; draw `n` IID teams (n a Peano nat); they share the identity prior theta.
+(define (make-teams theta n)
+  (match n
+    O => (Nil)
+    S m => (Cons (make-team theta) (make-teams theta m))))
+
+;; --- observation ------------------------------------------------------------
+;; observe one match. `home` is the first team in the pair and gets the +1 home
+;; boost (scale at index p+1); `away` is the second (scale at index p). Each
+;; team's single rate is scaled by its matchup factor. counts are native ints.
+(define (observe-match home away g-home g-away)
+  (let ((p (+ (team-id home) (team-id away))))        ;; base matchup index in {0..4}
+    (and (native_eq (poisson (*. (team-rate home) (index (+ p 1) rate-scales))) g-home)  ;; home: scale_{p+1}
+         (native_eq (poisson (*. (team-rate away) (index p rate-scales))) g-away))))     ;; away: scale_p
+
+;; fold the score list into one evidence conjunction.
+(define (observe-scores teams gs)
+  (match gs
+    Nil => (True)
+    Cons g rest =>
+      (match g
+        Game i j gi gj =>
+          (and (observe-match (index i teams) (index j teams) gi gj)
+               (observe-scores teams rest)))))
+
+(define team-names ["T0" "T1" "T2" "T3" "T4" "T5"])
+
+(define scores
+  [(Game 0 1 @1 @2) (Game 0 2 @1 @1) (Game 0 3 @2 @3) (Game 0 4 @0 @0) (Game 0 5 @2 @5)
+   (Game 1 0 @3 @1) (Game 1 2 @1 @0) (Game 1 3 @5 @0) (Game 1 4 @1 @0) (Game 1 5 @0 @1)
+   (Game 2 0 @3 @1) (Game 2 1 @0 @0) (Game 2 3 @1 @3) (Game 2 4 @1 @0) (Game 2 5 @3 @1)
+   (Game 3 0 @5 @2) (Game 3 1 @1 @1) (Game 3 2 @3 @1) (Game 3 4 @1 @0) (Game 3 5 @0 @2)
+   (Game 4 0 @0 @1) (Game 4 1 @0 @0) (Game 4 2 @1 @0) (Game 4 3 @1 @0) (Game 4 5 @1 @1)
+   (Game 5 0 @3 @2) (Game 5 1 @0 @0) (Game 5 2 @2 @2) (Game 5 3 @2 @1) (Game 5 4 @0 @0)])
+
+;; Posterior over team T0's identity label ("defend"/"balanced"/"attack"), given
+;; every match score -- a 3-way categorical.
+(query soccer-T0-identity
+  (let ((theta (dirichlet 1.0 1.0 1.0))
+        (teams (make-teams theta (length team-names))))
+    (Posterior (== (team-id (index 0 teams)) 2)
+               (observe-scores teams scores))))

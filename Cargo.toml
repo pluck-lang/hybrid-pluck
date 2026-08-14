@@ -1,0 +1,65 @@
+[package]
+name = "pluck"
+version = "0.1.0"
+edition = "2021"
+description = "Pluck: a discrete probabilistic programming language with lazy knowledge compilation"
+
+[features]
+default = ["backend-rsdd"]
+# Exactly one backend-* feature selects the active Boolean-factorization library
+# at compile time (enforced by a compile_error! guard in discrete_factorizations).
+backend-rsdd = ["dep:rsdd"]
+backend-oxidd = ["dep:oxidd"]
+backend-cudd = ["dep:cudd-sys"]
+backend-sylvan = ["dep:sylvan-sys"]
+
+[dependencies]
+rsdd = { path = "vendor/rsdd", optional = true }
+oxidd = { version = "0.12", optional = true }
+cudd-sys = { version = "1.1.2-alpha.2", optional = true }
+sylvan-sys = { version = "1.1", optional = true }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+rand = "0.8"
+ordered-float = { version = "5.3.0", features = ["serde"] }
+nalgebra = { version = "0.34.2", features = ["serde-serialize"] }
+itertools = "0.14.0"
+indenter = "0.3.4"
+rand_distr = "0.6.0"
+num-traits = "0.2.19"
+
+[dev-dependencies]
+libtest-mimic = "0.8"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+serde-wasm-bindgen = "0.6"
+getrandom = { version = "0.2", features = ["js"] }
+console_error_panic_hook = "0.1"
+
+[lib]
+name = "pluck"
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "pluck"
+path = "src/main.rs"
+
+# These two discover their `.pluck` files at runtime via libtest-mimic, so
+# nothing in `examples/` or `tests/programs/` is a build-time input. Adding or
+# editing a `.pluck` file recompiles nothing.
+[[test]]
+name = "run_examples"
+harness = false
+
+[[test]]
+name = "run_programs"
+harness = false
+
+[profile.release]
+# Native release builds optimize for speed (~8-16% faster BDD work on the Rust
+# backends). The wasm build overrides this back to size ("s") via
+# CARGO_PROFILE_RELEASE_OPT_LEVEL in build-wasm.sh, keeping the shipped .wasm small.
+opt-level = 3
+lto = true

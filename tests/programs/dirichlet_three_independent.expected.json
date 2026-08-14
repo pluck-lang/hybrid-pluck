@@ -1,0 +1,43 @@
+[
+  {
+    "query": "three-dirichlets",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "(Triple a b c)",
+          "log_probability": 0.0,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [
+              {
+                "name": "a",
+                "alphas": [
+                  2.0,
+                  1.0,
+                  1.0
+                ]
+              },
+              {
+                "name": "b",
+                "alphas": [
+                  2.0,
+                  1.0
+                ]
+              },
+              {
+                "name": "c",
+                "alphas": [
+                  2.0,
+                  1.0,
+                  1.0
+                ]
+              }
+            ],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

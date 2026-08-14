@@ -1,0 +1,5 @@
+(define (beta-prob-obs)
+    (let ((p (beta 1.0 1.0)))
+    (Posterior p (flip p))))
+
+(query beta-flip-observation (beta-prob-obs))

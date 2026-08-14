@@ -1,0 +1,64 @@
+;; SIR epidemic HMM
+;;
+;; A boolean hidden state (infected?) evolves over 12 steps,
+;; emitting a noisy symptom each step. 4 continuous Beta parameters govern the
+;; process; we condition on one observed symptom history and query the exact
+;; posterior of the InfectionRate
+(define symptom-histories
+  [[false, false, false, false, false, true, true, true, false, true, false, false],
+   [false, true, false, true, true, true, true, true, false, false, false, false]])
+
+(define-type param
+  (RecoveryRate)
+  (InfectionRate)
+  (BaselineSymptomRate)
+  (InfectedSymptomRate))
+
+(define (prior)
+  (let ((rec (beta 1.0 1.0))
+        (inf (beta 1.0 1.0))
+        (bas (beta 0.2 1.0))
+        (sym (beta 1.0 1.0)))
+    (fn p ->
+      (match p
+        RecoveryRate => rec
+        InfectionRate => inf
+        BaselineSymptomRate => bas
+        InfectedSymptomRate => sym))))
+
+(define (transition infected params)
+  (if infected
+    (not (flip (params (RecoveryRate))))
+    (flip (params (InfectionRate)))))
+
+(define (generate-observation infected params)
+  (if infected
+    (flip (params (InfectedSymptomRate)))
+    (flip (params (BaselineSymptomRate)))))
+
+(define (hmm state params)
+  (let ((next-state (transition state params)))
+    (Cons
+     (Pair state (generate-observation state params))
+     (hmm next-state params))))
+
+(define (follows-observation-sequence seq bs)
+  (match bs
+    Nil => (True)
+    Cons b bs => (match seq
+                   Nil => (True)
+                   Cons s ss => (and (if s b (not b)) (follows-observation-sequence ss bs)))))
+
+(define (all-agree-exact histories chains)
+  (match histories
+    Nil => (True)
+    Cons h hs => (if (follows-observation-sequence h (car chains))
+                   (all-agree-exact hs (cdr chains))
+                   (False))))
+
+(query infer-params
+       (let (params (prior)
+                    chains (map (fn _ -> (map snd (hmm (False) params))) (range (length symptom-histories))))
+         (Posterior
+          (params (InfectionRate))
+          (all-agree-exact symptom-histories chains))))

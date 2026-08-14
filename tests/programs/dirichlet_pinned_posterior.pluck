@@ -1,0 +1,9 @@
+; Return the Dirichlet variable itself as the query, conditioning on a
+; `dirichlet_eq` observation. Exercises the `RealEq × Dirichlet → Pinned`
+; posterior rule: the JSON output should report `p` as `Pinned` at the
+; observed vector.
+(define (dirichlet-pin-posterior)
+    (let ((p (dirichlet 1.0 1.0 1.0)))
+    (Posterior p (dirichlet_eq p {0.2, 0.3, 0.5}))))
+
+(query pinned-dirichlet (dirichlet-pin-posterior))

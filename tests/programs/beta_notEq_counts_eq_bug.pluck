@@ -1,0 +1,24 @@
+; Regression test for a merge-order bug: when `(merge_beta_maps` composes
+; `RealNotEq({0.5}) × Counts(...) × RealEq(0.5)` on the same Beta variable,
+; the middle `Counts` can silently drop the `RealNotEq` exclusion, making the
+; contradictory path `RealNotEq × RealEq` survive as a non-zero leaf.
+;
+; Model: evaluates to True iff  (prob_eq x 0.5) ∧ (flip x) ∧ ¬(prob_eq x 0.5).
+; That conjunction is logically impossible — both prob_eq's refer to the same
+; Beta variable x and the same constant 0.5 — so the evidence event is
+; unreachable and `Posterior True evidence` should be empty.
+;
+; With the merge-order bug the path
+;     high(pe1) × high(flip) × low(pe2)  =  RealEq(0.5) × Counts(1,0) × RealNotEq({0.5})
+; is bottom-up reduced as
+;     merge(RealNotEq, Counts) -> Counts    (NotEq is silently dropped)
+;     merge(RealEq, Counts)    -> RealEq(0.5) × factor 0.5     (non-zero!)
+; so the evidence phantomly has probability 0.5·ε, the Posterior normalizes
+; against it, and the query returns True with probability 1.
+(query
+  (let (x (beta 1.0 1.0))
+    (Posterior
+      True
+      (and (prob_eq x 0.5)
+           (and (flip x)
+                (not (prob_eq x 0.5)))))))

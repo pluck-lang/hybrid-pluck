@@ -1,0 +1,52 @@
+[
+  {
+    "query": "(let((r(gamma 2.0 1.0))) (Posterior r(real_lt(exponential r) 0.5)))",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "λ",
+          "log_probability": 0.0,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gamma": [
+              {
+                "gamma": {
+                  "Mixture": {
+                    "name": "λ",
+                    "mixture": [
+                      [
+                        {
+                          "n": 1.0,
+                          "c": 1.0
+                        },
+                        {
+                          "log_w": 0.587786664902119,
+                          "sign": 1
+                        }
+                      ],
+                      [
+                        {
+                          "n": 1.0,
+                          "c": 1.5
+                        },
+                        {
+                          "log_w": 0.587786664902119,
+                          "sign": -1
+                        }
+                      ]
+                    ]
+                  }
+                },
+                "poisson": {},
+                "exponential": {}
+              }
+            ],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

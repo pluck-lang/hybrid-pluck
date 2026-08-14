@@ -1,0 +1,7 @@
+; Either z == 0.5 (measure 0) and x is a dirac delta or z != 0.5 and x == 0.5 (measure 0)
+; This gives a mixture of a dirac and uniform density for y
+(query 
+  (let ((z (beta 1.0 1.0))
+        (x (if (prob_eq z 0.5) 0.5 (beta 1.0 1.0)))
+        (y (if (prob_eq z 0.5) 0.5 (beta 1.0 1.0))))
+    (Posterior y (prob_eq x 0.5))))

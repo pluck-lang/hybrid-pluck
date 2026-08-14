@@ -1,0 +1,31 @@
+;; Port of Alea.jl/benchmarks/clickGraph.jl
+;;
+;; A "click graph" similarity model. similarityAll ~ Uniform[0,1]. For each of
+;; 5 trials: draw sim ~ Bernoulli(similarityAll); beta1 ~ Uniform[0,1];
+;; beta2 = beta1 if the two items are similar, else a fresh Uniform[0,1];
+;; then the two observed clicks are Bernoulli(beta1) and Bernoulli(beta2).
+;; Observe the click data and return the posterior over similarityAll.
+;;
+;; Uniform[0,1] is expressed as Beta(1,1).
+
+(define (trial sa c0 c1)
+  (let ((sim (flip sa))
+        (b1 (beta 1.0 1.0))
+        (b2 (if sim b1 (beta 1.0 1.0))))
+    (and (iff (flip b1) c0)
+         (iff (flip b2) c1))))
+
+(define (all-trials sa c0s c1s)
+  (match c0s
+    Nil => (True)
+    Cons c0 rest0 =>
+      (match c1s
+        Cons c1 rest1 =>
+          (and (trial sa c0 c1) (all-trials sa rest0 rest1)))))
+
+(query clickGraph
+  (let ((similarityAll (beta 1.0 1.0)))
+    (Posterior similarityAll
+      (all-trials similarityAll
+        [true, true, true, false, false]
+        [true, true, true, false, false]))))

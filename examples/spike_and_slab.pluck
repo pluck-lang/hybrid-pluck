@@ -1,0 +1,56 @@
+;; Spike-and-Slab Variable Selection
+;; George & McCulloch (1993), "Variable Selection Via Gibbs Sampling" (JASA),
+;; applied to the Hald cement dataset (13 observations, inlined below as X and ys).
+;;
+;;   y      = heat evolved (cal/g) during hardening
+;;   x1..x4 = weight percentages of four clinker compounds
+;;
+;; Each slope b_i carries the George-McCulloch stochastic-search prior:
+;; a latent Bernoulli indicator g_i (inclusion probability 1/2) selects
+;; between a zero "spike" and a diffuse "slab" normal:
+;;
+;;   g_i = 0  ->  b_i ~ 0 (spike: variable excluded)
+;;   g_i = 1  ->  b_i ~ N(0, sigma^2)    (slab:  variable selected)
+
+(define X
+  [[ 7.0, 26.0,  6.0, 60.0],
+   [ 1.0, 29.0, 15.0, 52.0],
+   [11.0, 56.0,  8.0, 20.0],
+   [11.0, 31.0,  8.0, 47.0],
+   [ 7.0, 52.0,  6.0, 33.0],
+   [11.0, 55.0,  9.0, 22.0],
+   [ 3.0, 71.0, 17.0,  6.0],
+   [ 1.0, 31.0, 22.0, 44.0],
+   [ 2.0, 54.0, 18.0, 22.0],
+   [21.0, 47.0,  4.0, 26.0],
+   [ 1.0, 40.0, 23.0, 34.0],
+   [11.0, 66.0,  9.0, 12.0],
+   [10.0, 68.0,  8.0, 12.0]])
+
+(define ys
+  [78.5, 74.3, 104.3, 87.6, 95.9, 109.2, 102.7,
+   72.5, 93.1, 115.9, 83.8, 113.3, 109.4])
+
+;; --- spike-and-slab hyperparameters ---
+(define slab-sigma  10.0)    ; c * tau : diffuse "slab" prior sd
+(define noise-sigma 2.5)     ; residual sd (fixed)
+
+;; b_i ~ spike if excluded, slab if selected
+(define (spike-slab g)
+  (if g (normal 0.0 slab-sigma) 0.0))
+
+;; b1*x1 + b2*x2 + ... : a linear combination of slopes (Gaussians) with the
+;; constant predictor row, so it stays in the conjugate linear-Gaussian path.
+(define (dot-row ws xs)
+  (match ws
+    Nil => 0.0
+    Cons w ws => (+. (*. w (car xs)) (dot-row ws (cdr xs)))))
+
+(query variable-selection
+  (let
+   ((gs    (map (fn _ -> (flip 0.5)) [0, 1, 2, 3]))     ; inclusion indicators
+    (betas (map spike-slab gs))                          ; slope coefficients
+    (b0    (normal 0.0 100.0))                           ; intercept (always in)
+    (mus   (map (fn row -> (+. b0 (dot-row betas row))) X))
+    (data  (map (fn mu -> (normal mu noise-sigma)) mus)))
+   (Posterior (index 0 gs) (list=? real=? data ys))))

@@ -1,0 +1,49 @@
+;; F81 molecular-evolution likelihood on a fixed 4-tip tree, with its own
+;; fixed alignment data and queries below.
+;;
+;; Two latents (shared across all
+;; sites and branches) drive evolution:
+;;   - rate, as retention probability p   (enters via (flip p))
+;;   - base frequencies pi                (enters via (categorical pi))
+;; A branch keeps the parent base with prob p, else redraws from pi.
+
+(define (evolve parent p pi) (if (flip p) parent (categorical pi)))
+
+;; one site's tip pattern under the fixed ((L L)(M M)) tree topology.
+(define (tips p pi)
+  (let ((root (categorical pi)))
+    (let ((L (evolve root p pi)) (M (evolve root p pi)))
+      [(evolve L p pi), (evolve L p pi), (evolve M p pi), (evolve M p pi)])))
+
+(define (leq xs ys)
+  (match xs Nil => (True)
+    Cons x xr => (match ys Cons y yr => (and (native_eq x y) (leq xr yr)))))
+
+;; evidence: every observed column matches a draw from the tree.
+(define (sites-match p pi cols)
+  (match cols Nil => (True)
+    Cons c rest => (and (leq (tips p pi) c) (sites-match p pi rest))))
+
+(define alignment
+  [ [@2, @0, @1, @1],
+    [@3, @3, @3, @3],
+    [@0, @0, @2, @2],
+    [@0, @2, @0, @1] ])
+
+;; --- Read results from the per-parameter MARGINALS (clean, fully displayed): ---
+
+(query rate-only          ;; posterior of the rate (retention prob p)
+  (let ((p (beta 1.0 1.0)) (pi (dirichlet 1.0 1.0 1.0 1.0)))
+    (Posterior p (sites-match p pi alignment))))
+
+(query freqs-only         ;; posterior of the base frequencies pi
+  (let ((p (beta 1.0 1.0)) (pi (dirichlet 1.0 1.0 1.0 1.0)))
+    (Posterior pi (sites-match p pi alignment))))
+
+;; --- The JOINT posterior: BOTH at once. slow, expensive -- the
+;;     Beta x Dirichlet mixture has thousands of components (4 sites -> ~12k;
+;;     grows ~3x per added site), and pluck truncates the printout, so use the
+;;     marginals above to read means. Still exact. ---
+(query rate-and-frequencies
+  (let ((p (beta 1.0 1.0)) (pi (dirichlet 1.0 1.0 1.0 1.0)))
+    (Posterior (Pair p pi) (sites-match p pi alignment))))

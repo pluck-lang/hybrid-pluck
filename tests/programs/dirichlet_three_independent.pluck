@@ -1,0 +1,12 @@
+(define-type triple (Triple a b c))
+
+(define (three-dirichlets)
+    (let ((p (dirichlet 1.0 1.0 1.0))
+          (q (dirichlet 1.0 1.0))
+          (r (dirichlet 1.0 1.0 1.0))
+          (p0 (vector_index p @0))
+          (q0 (vector_index q @0))
+          (r0 (vector_index r @0)))
+    (Posterior (Triple p q r) (and (flip p0) (and (flip q0) (flip r0))))))
+
+(query three-dirichlets (three-dirichlets))

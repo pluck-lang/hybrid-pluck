@@ -1,0 +1,52 @@
+;; Port of Alea.jl/benchmarks/GPA.jl
+;;
+;; Two grading systems. School 1 (chosen w.p. 0.25): GPA is a continuous
+;; 4*Beta(8,2) w.p. 0.95, else a perfect 4.0 w.p. 0.15, else 0.0. School 2
+;; (w.p. 0.75): GPA is 8*Beta(5,5) w.p. 0.99, else 8.0 w.p. 0.1, else 0.0.
+;; We observe the student's GPA == 0.0 and ask which school they're from (n).
+;;
+;; pluck cannot represent a scaled Beta (e.g. (*. 4.0 (beta 8.0 2.0))). The
+;; trick: don't scale the distribution, scale the observation instead. Since
+;;   scale * Beta(a,b) == v   <=>   Beta(a,b) == v / scale,
+;; we observe the raw Beta equals v/scale via `prob_eq` (which conditions a
+;; Beta draw on exact equality to a float). Because each school's GPA is a
+;; mixture of a scaled Beta and point masses, the scale folded into the
+;; observation is a mixture too: /4 in school 1's continuous branch, /8 in
+;; school 2's, and the point masses are compared to v directly.
+;;
+;; For the observed value v = 0.0 both Betas have density 0 at v/scale = 0
+;; (Beta(8,2) and Beta(5,5) vanish at the boundary), so the continuous
+;; branches contribute zero weight and only the 0.0 point masses survive:
+;;   P(n | v=0) = 0.25*(0.05*0.85) / (0.25*(0.05*0.85) + 0.75*(0.01*0.9))
+;;              = 0.010625 / 0.017375 ~= 0.6115.
+;;
+;; (Caveat: for a non-zero observation the change of variables also introduces
+;; a Jacobian 1/scale on the density; that factor is irrelevant here because
+;; the boundary density is exactly 0.)
+
+;; scale * Beta(a,b) == v   <=>   Beta(a,b) == v/scale
+(define (scaled-beta-eq a b scale v)
+  (prob_eq (beta a b) (/. v scale)))
+
+;; Evidence that school 1's GPA equals v.
+(define (gpa1-eq v)
+  (if (flip 0.95)
+      (scaled-beta-eq 8.0 2.0 4.0 v)   ; continuous 4*Beta(8,2)
+      (if (flip 0.15)
+          (real_eq 4.0 v)               ; point mass at 4.0
+          (real_eq 0.0 v))))            ; point mass at 0.0
+
+;; Evidence that school 2's GPA equals v.
+(define (gpa2-eq v)
+  (if (flip 0.99)
+      (scaled-beta-eq 5.0 5.0 8.0 v)   ; continuous 8*Beta(5,5)
+      (if (flip 0.1)
+          (real_eq 8.0 v)               ; point mass at 8.0
+          (real_eq 0.0 v))))            ; point mass at 0.0
+
+(define observed-gpa 0.0)
+
+(query GPA
+  (let ((n (flip 0.25)))
+    (Posterior n
+      (if n (gpa1-eq observed-gpa) (gpa2-eq observed-gpa)))))

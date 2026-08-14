@@ -1,0 +1,19 @@
+[
+  {
+    "query": "(let(x(gaussian 0.0 1.0)) (let(y(gaussian 0.0 1.0)) (Posterior True(and(real_eq x 0.3) (not(real_eq y 0.7))))))",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "True",
+          "log_probability": 0.0,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

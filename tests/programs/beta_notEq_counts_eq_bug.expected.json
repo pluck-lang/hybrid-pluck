@@ -1,0 +1,9 @@
+[
+  {
+    "query": "(let(x(beta 1.0 1.0)) (Posterior True(and(prob_eq x 0.5) (and(flip x) (not(prob_eq x 0.5))))))",
+    "kind": {
+      "result_kind": "distribution",
+      "items": []
+    }
+  }
+]

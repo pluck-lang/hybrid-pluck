@@ -1,0 +1,28 @@
+[
+  {
+    "query": "pinned-dirichlet",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "p",
+          "log_probability": 0.0,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [
+              {
+                "name": "p",
+                "value": [
+                  0.2,
+                  0.3,
+                  0.5
+                ]
+              }
+            ],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

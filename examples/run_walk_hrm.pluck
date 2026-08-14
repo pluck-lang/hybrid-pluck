@@ -1,0 +1,42 @@
+;; A person alternates between running and walking with heart rate readings
+(define obs [82.0, 81.0, 80.0, 83.0, 120.0, 124.0, 120.0, 85.0])
+
+(define (gen-params)
+  (let
+   ((start-rate (beta 1.0 1.0))
+    (stop-rate (beta 1.0 1.0))
+    (base-hr (normal 70.0 20.0))
+    (incr (normal 40.0 20.0)))
+    (Pair (Pair start-rate stop-rate)
+          (Pair base-hr (+. base-hr incr)))))
+
+(define (reverse-helper xs ys)
+  (match xs
+    Nil => ys
+    Cons x xs => (reverse-helper xs (Cons x ys))))
+(define (reverse xs)
+  (reverse-helper xs []))
+
+(define (hmm params state past hrs t)
+  (match t
+    O => (Pair (reverse hrs) (reverse past))
+    S t => (let
+            ((running state)
+             (hr (normal (if running
+                           (snd (snd params))
+                           (fst (snd params))) 5.0))
+             (new-running (if running
+                            (not (flip (snd (fst params))))
+                            (flip (fst (fst params))))))
+             (hmm params
+                  new-running
+                  (Cons state past)
+                  (Cons hr hrs)
+                  t))))
+
+(query
+ (let ((params (gen-params))
+       (res (hmm params false [] [] (length obs)))
+       (hrs (fst res))
+       (sts (snd res)))
+   (Posterior (fst (snd params)) (list=? real=? hrs obs))))

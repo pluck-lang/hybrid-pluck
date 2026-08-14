@@ -1,0 +1,10 @@
+; Gibbs with a False condition: the chain stalls at step 0, returns an
+; empty samples list, and emits a stderr stall notice.
+(query
+  gibbs-stall
+  (let ((x (flip 0.5)))
+    (Gibbs (if x (True) (False))
+           (False)
+           5
+           [x]
+           (WithConstant (True)))))

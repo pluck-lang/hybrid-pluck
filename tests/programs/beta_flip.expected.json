@@ -1,0 +1,27 @@
+[
+  {
+    "query": "beta-flip-observation",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "p",
+          "log_probability": 0.0,
+          "posteriors": {
+            "beta": [
+              {
+                "Beta": {
+                  "name": "p",
+                  "a": 2.0,
+                  "b": 1.0
+                }
+              }
+            ],
+            "dirichlet": [],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

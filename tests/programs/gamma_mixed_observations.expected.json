@@ -1,0 +1,32 @@
+[
+  {
+    "query": "(let((r(gamma 2.0 1.0))) (Posterior r(and(native_eq(poisson r) @2) (real_eq(exponential r) 0.5))))",
+    "kind": {
+      "result_kind": "distribution",
+      "items": [
+        {
+          "display": "λ",
+          "log_probability": 0.0,
+          "posteriors": {
+            "beta": [],
+            "dirichlet": [],
+            "gamma": [
+              {
+                "gamma": {
+                  "Gamma": {
+                    "name": "λ",
+                    "shape": 5.0,
+                    "rate": 2.5
+                  }
+                },
+                "poisson": {},
+                "exponential": {}
+              }
+            ],
+            "gaussian": []
+          }
+        }
+      ]
+    }
+  }
+]

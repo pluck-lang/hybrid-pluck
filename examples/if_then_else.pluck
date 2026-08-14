@@ -1,0 +1,5 @@
+; Conditional coin flip
+; P(True) = 0.5*0.8 + 0.5*0.2 = 0.5
+(query if-flip
+  (Marginal
+    (if (flip 0.5) (flip 0.8) (flip 0.2))))
