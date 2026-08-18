@@ -161,4 +161,4 @@ construction, which is done on the fly as the programs symbolically executes.
 * [Guided Tour: A Hidden Markov Model](guided_tour_hmm.md) — one realistic model end to end
 * [Language Reference](language_reference.md) — the full syntax and every primitive
 * [Continuous Variables](continuous_variables.md) — the conjugate families and their rules
-* [Examples](examples.md) — 45 programs to borrow from
+* [Examples](examples.md) — 46 programs to borrow from

@@ -1,0 +1,49 @@
+;; Two patients, one shared disease
+;;
+;; Each patient is either infected or not on each of 8 days -- a boolean
+;; hidden state -- and a thermometer reading is taken every day: a fever
+;; temperature when infected, and 98.6 give or take half a degree when
+;; healthy. Three parameters are shared by both patients: the daily
+;; infection probability, the daily recovery probability, and the mean fever
+;; temperature. Because they are shared, patient B's chart informs what we
+;; believe about patient A.
+;;
+;; This is examples/sir_model.pluck with continuous emissions in place of
+;; boolean symptoms, and two chains rather than one.
+
+(define patient-a [98.5, 98.4, 101.3, 101.8, 101.5, 99.8, 98.2, 97.9])
+(define patient-b [98.5, 97.9, 100.7, 101.4, 102.0, 101.1, 100.9, 98.4])
+
+(define-type rates (Rates inf rec fever))
+
+(define (inf rates)   (match rates Rates inf rec fever => inf))
+(define (rec rates)   (match rates Rates inf rec fever => rec))
+(define (fever rates) (match rates Rates inf rec fever => fever))
+
+(define (prior)
+  (Rates (beta 1.0 1.0) (beta 1.0 1.0) (normal 101.0 2.0)))
+
+(define (transition infected rates)
+  (if infected
+    (not (flip (rec rates)))
+    (flip (inf rates))))
+
+(define (read-temperature infected rates)
+  (if infected
+    (normal (fever rates) 1.0)
+    (normal 98.6 0.5)))
+
+(define (hmm state rates)
+  (Cons (Pair state (read-temperature state rates))
+        (hmm (transition state rates) rates)))
+
+(define (chart-matches chain history)
+  (list=? real=? (map snd (take (length history) chain)) history))
+
+(define (charts-match rates)
+  (and (chart-matches (hmm false rates) patient-a)
+       (chart-matches (hmm false rates) patient-b)))
+
+(query infer-infection-rate
+  (let ((rates (prior)))
+    (Posterior (inf rates) (charts-match rates))))

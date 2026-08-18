@@ -34,7 +34,7 @@ Then read [A Simple Example](a_simple_example.md).
 
 ## Where things live
 
-* `examples/` — 45 runnable example programs
+* `examples/` — 46 runnable example programs
 * `tests/programs/` — 71 small single-feature programs with expected outputs
 * `stdlib.pluck` — the standard library, loaded into every program
 * `src/` — the implementation; see the [root README](../README.md) for a module map

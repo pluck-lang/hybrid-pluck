@@ -1,6 +1,6 @@
 # Examples
 
-The `examples/` directory holds 45 programs. Every one runs with
+The `examples/` directory holds 46 programs. Every one runs with
 
 ```
 cargo run --release examples/<name>.pluck
@@ -74,6 +74,7 @@ header comment.
 | `hmm_second_order` | State depends on the previous two |
 | `hmm_factorial` | Two independent hidden chains driving a single observation |
 | `sir_model` | SIR epidemic HMM with four Beta parameters over 12 steps |
+| `two_patients_fever` | Two patients' temperature charts sharing one disease's infection, recovery, and fever parameters; two queries over one model |
 | `ssm` | State-space model over 2-D points |
 | `changepoint_coal` | British coal-mining disaster counts, 1851–1961; Gamma-Poisson with a latent changepoint |
 
@@ -98,8 +99,8 @@ header comment.
 |---|---|
 | `Gibbs` | `gaussian_mixture_gibbs` — the only example using it |
 | `PosteriorSamples` | `posterior_sampling`, `bst` |
-| `beta` | `coinBias`, `beta_bernoulli`, `sir_model`, `clickGraph`, `dawid_skene`, `king_ei`, and 14 more |
-| `gaussian` / `normal` | `conjugate_gaussians`, `linear_regression`, `run_walk_hrm`, `hmm_first_order`, and 16 more |
+| `beta` | `coinBias`, `beta_bernoulli`, `sir_model`, `clickGraph`, `dawid_skene`, `king_ei`, and 15 more |
+| `gaussian` / `normal` | `conjugate_gaussians`, `linear_regression`, `run_walk_hrm`, `hmm_first_order`, and 17 more |
 | `dirichlet` | `pcfg`, `soccer`, `f81_joint`, `gaussian_mixture_gibbs` |
 | `categorical` | `hmm_first_order`, `hmm_second_order`, `hmm_factorial`, `pcfg`, `soccer`, `f81_joint`, `gaussian_mixture_gibbs` |
 | `gamma`, `poisson` | `changepoint_coal`, `soccer` |
