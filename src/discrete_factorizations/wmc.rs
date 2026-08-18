@@ -97,9 +97,8 @@ where
     {
         // Terminals first (no memo traffic), then the memo, and only then
         // decompose. `node()` materializes owned children, so checking the
-        // cache after decomposing — as this used to — took and released two
-        // references per hit for nothing. DAG sharing makes hits the common
-        // case, so the order matters.
+        // cache after decomposing takes and releases two
+        // references per hit for nothing.
         if p.is_true() {
             return T::one();
         }

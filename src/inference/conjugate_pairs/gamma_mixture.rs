@@ -2,8 +2,8 @@
 /// represented as collections of terms `sign · exp(log_w) · λ^n e^{−cλ}`.
 ///
 /// Each term `λ^n e^{−cλ}` is an *unnormalised* Gamma kernel with shape
-/// `n + 1` and rate `c`. A signed mixture of these is exactly what a Gamma
-/// posterior under partial (range) observations looks like: complement
+/// `n + 1` and rate `c`. A signed mixture of these is a Gamma
+/// posterior under partial (range) observations: complement
 /// tricks such as `P(k ≥ lo | λ) = 1 − Σ_{k<lo} pois(k|λ)` subtract
 /// probability mass, so some terms carry negative weights. The overall
 /// density is non-negative and the (component) weights sum to 1.

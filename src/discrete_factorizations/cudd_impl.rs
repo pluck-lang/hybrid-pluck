@@ -10,14 +10,12 @@
 //! is written around. That is what lets intermediate nodes die — a result of
 //! `Cudd_bddAnd` comes back with `ref == 0` and is protected only by whoever
 //! references it, so once the last handle to a transient sub-result drops,
-//! CUDD counts it dead and sweeps it at the next table growth. (The previous
-//! interning design pinned every distinct handle forever, which is why
-//! `dead` and `gc_runs` were permanently zero.)
+//! CUDD counts it dead and sweeps it at the next table growth. This can be 
+//! useful in cases where intermediate BDDs are very large and cause memory
+//! blowups.
 //!
 //! Dynamic reordering is disabled so our `new_var_at_position` order is
-//! authoritative. The manager is **never** `Cudd_Quit`ed: handles live inside
-//! the `Rc`'d value graph and can outlive the factorizer, so the manager has to
-//! outlive the process instead.
+//! authoritative.
 //!
 //! All `unsafe`/FFI is quarantined in this module.
 
@@ -317,12 +315,6 @@ impl BooleanFactorization for CuddFactorizer {
 }
 
 impl CuddFactorizer {
-    /// Dump CUDD's own bookkeeping to stderr (opt-in via `PLUCK_CUDD_STATS`).
-    ///
-    /// The point of interest is reclamation: under a pin-everything discipline
-    /// `dead` and `gc_runs` stay at zero and `live == peak_live`, meaning the
-    /// unique table only ever grows. Those three are the direct before/after
-    /// measure of whether dropping dead nodes actually works.
     fn report_cudd_counters(&self) {
         unsafe {
             eprintln!(

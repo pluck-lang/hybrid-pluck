@@ -1,8 +1,11 @@
 //! The OxiDD-backed implementation of [`BooleanFactorization`].
 //!
 //! OxiDD (pure Rust) is used via its **complement-edge** BDD variant
-//! (`oxidd::bcdd`), which matches our "push the complement into the children"
-//! traversal contract.
+//! (`oxidd::bcdd`)
+//! 
+//! OxiDD *does not* support inserting variables at specific positions
+//! so the resulting variable ordering (and program performance) may
+//! differ meaningfully from other backends.
 
 use std::cell::RefCell;
 
@@ -57,9 +60,7 @@ fn constant(want_true: bool) -> BCDDFunction {
 /// An owning handle to an OxiDD BCDD function.
 ///
 /// The newtype exists only to add `Debug` (which `BCDDFunction` does not
-/// derive) and to keep oxidd's types out of the engine-facing signature;
-/// `Clone`/`Drop` are the inner handle's, so liveness is oxidd's own
-/// refcounting.
+/// derive) and to keep oxidd's types out of the engine-facing signature
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct OxiddBdd(BCDDFunction);
 

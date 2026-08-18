@@ -1,9 +1,9 @@
 //! The `rsdd`-backed implementation of [`BooleanFactorization`].
 //!
-//! This is the one module that knows about `rsdd`. It wraps a single
-//! `RobddBuilder` whose arena is leaked to `'static` (so pointers can be stored
-//! freely in the value graph, caches, and maps without a borrow tying them to
-//! the manager). All the `unsafe` needed for that leak is quarantined here.
+//! Wraps a single `RobddBuilder` whose arena is leaked to `'static` 
+//! (so pointers can be stored freely in the value graph, caches, 
+//! and maps without a borrow tying them to the manager). All the 
+//! `unsafe` needed for that leak is quarantined here.
 
 use std::collections::HashMap;
 use std::fmt;
@@ -31,10 +31,6 @@ fn to_label(v: VarId) -> VarLabel {
 fn from_label(l: VarLabel) -> VarId {
     VarId(l.value())
 }
-
-// ---------------------------------------------------------------------------
-// The handle
-// ---------------------------------------------------------------------------
 
 /// An owning handle to an `rsdd` BDD.
 ///
@@ -71,10 +67,6 @@ impl BooleanFunctionOps for RsddBdd {
         DDNNFPtr::is_false(&self.0)
     }
 }
-
-// ---------------------------------------------------------------------------
-// The factorizer
-// ---------------------------------------------------------------------------
 
 /// An `rsdd` ROBDD factorizer. Cheap to copy — it is a `'static` reference to
 /// the shared, leaked builder.
@@ -145,8 +137,7 @@ impl BooleanFactorization for RsddFactorizer {
             BddPtr::PtrFalse => BddNode::False,
             BddPtr::Reg(_) | BddPtr::Compl(_) => {
                 // Push the complement bit into the children so callers see
-                // honest sub-functions (the same idiom the engine's DAG walks
-                // used to hand-roll).
+                // honest sub-functions
                 let raw = p.raw();
                 let (low, high) = if raw.is_neg() {
                     (raw.low_raw().neg(), raw.high_raw().neg())

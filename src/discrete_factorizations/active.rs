@@ -8,11 +8,7 @@
 
 use super::boolean_factorization::BooleanFactorization;
 
-// --- exactly-one-backend guard -------------------------------------------
-// Cargo features are additive, so "pick exactly one backend" can't be expressed
-// in Cargo itself. Instead, count the enabled backends at compile time and
-// assert the count is 1 — this single check rejects both zero and multiple
-// selections, with one clear message.
+// Ensure exactly one backend is active
 const N_ACTIVE_BACKENDS: usize = cfg!(feature = "backend-rsdd") as usize
     + cfg!(feature = "backend-oxidd") as usize
     + cfg!(feature = "backend-cudd") as usize
@@ -25,7 +21,7 @@ const _: () = assert!(
      (use --no-default-features to drop the default rsdd)"
 );
 
-// --- the active factorizer ------------------------------------------------
+// Active Factorizer
 #[cfg(feature = "backend-cudd")]
 pub use super::cudd_impl::CuddFactorizer as Factorizer;
 #[cfg(feature = "backend-oxidd")]

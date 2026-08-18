@@ -38,7 +38,7 @@ pub fn false_path_condition_worlds() -> GuardedWorlds {
 /// Monadic bind — the **KC engine**: for each world in `pre_worlds`, apply
 /// `cont` and collect+join results.
 ///
-/// This is Julia's `bind_monad`. The continuation receives
+/// The continuation receives
 /// `(value, inner_path_condition, ctx, mode)` and returns GuardedWorlds.
 /// The mode handed to the continuation is a per-world
 /// `KC { path_condition: inner_path_condition }` — exactly the mode every
@@ -97,9 +97,7 @@ where
 /// In **KC mode**, delegates to `bind_monad`, the per-world fork/join
 /// engine. The path_condition is threaded through to bind_monad so that
 /// ThunkUnion evaluations triggered from continuations can prune branches
-/// whose guards are inconsistent with the current path condition. Without
-/// this, all TU branches are evaluated even when most are unreachable,
-/// causing monotonic ThunkUnion growth during SMC iterations.
+/// whose guards are inconsistent with the current path condition.
 pub fn bind_compile<F>(
     pre_worlds: GuardedWorlds,
     path_condition: BooleanFunction,
@@ -118,8 +116,8 @@ where
                 // error: propagate the empty result.
                 return inference_error_worlds();
             }
-            // Shaved mass met head-on: failed pattern match, `(error)`, or
-            // applying a non-function. Policy: program error → panic
+            // Shaved probability mass: failed pattern match, `(error)`, or
+            // applying a non-function.
             // (compile_case_of has already eprintln'd context for the
             // incomplete-match case).
             panic!(
@@ -144,9 +142,8 @@ where
 
 /// Create a ThunkUnion that flattens nested ThunkUnions and deduplicates by Rc identity.
 ///
-/// This matches Julia's `LazyKCThunkUnion` constructor which flattens nested unions
-/// and merges guards of identical thunks (by object identity). Without flattening,
-/// nested ThunkUnion trees cause exponential traversal in evaluate_thunk_union.
+/// Flattens nested unions and merges guards of identical thunks (by object identity). 
+/// Without flattening, nested ThunkUnion trees cause exponential traversal in evaluate_thunk_union.
 fn mk_thunk_union_flat(thunks: Vec<(PluckVal, BooleanFunction)>, builder: &Factorizer) -> PluckVal {
     let mut flat: Vec<(PluckVal, BooleanFunction)> = Vec::new();
 
@@ -199,8 +196,6 @@ fn mk_thunk_union_flat(thunks: Vec<(PluckVal, BooleanFunction)>, builder: &Facto
 /// This is the key optimization in lazy KC: when two worlds have the same
 /// constructor but different arguments, we merge them into a single world
 /// with ThunkUnion arguments. This avoids exponential blowup.
-///
-/// Corresponds to Julia's `join_monad`.
 pub fn join_monad(
     nested_worlds: Vec<(GuardedWorlds, BooleanFunction)>,
     pre_used_info: BooleanFunction,
@@ -398,7 +393,6 @@ pub fn join_monad(
 
 /// If-then-else in the BDD world:
 /// Creates two worlds: (val_true, condition) and (val_false, NOT condition)
-/// This matches Julia's if_then_else_monad which returns worlds with the condition as guard.
 pub fn if_then_else_monad(
     val_true: PluckVal,
     val_false: PluckVal,

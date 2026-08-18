@@ -3020,7 +3020,7 @@ impl<'a> CompilerCtx<'a> {
 
     /// Evaluate a thunk union by evaluating each component thunk.
     ///
-    /// No singleton cache here — matches Julia's behavior. Individual component
+    /// No singleton cache here. Individual component
     /// thunks (LazyKCThunk) have their own singleton caches, so work is still
     /// cached at the thunk level.
     ///
@@ -3055,7 +3055,6 @@ impl<'a> CompilerCtx<'a> {
     }
 
     /// Iteratively forces all thunks and IntDists in the value tree until none remain.
-    /// Corresponds to Julia's `infer_full_distribution`.
     pub fn infer_full_distribution(&mut self, initial_results: Vec<World>) -> Vec<World> {
         let mut queue: Vec<World> = initial_results;
         let mut resolved: Vec<World> = Vec::new();
